@@ -1,3 +1,5 @@
+"use client";
+
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import {
@@ -8,7 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Action, models, State } from "@/app/page";
+import { Action, State } from "@/lib/types";
+import { models } from "@/lib/utils";
 
 export default function Controls({
   state,
