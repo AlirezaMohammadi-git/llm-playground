@@ -1,5 +1,6 @@
 import Playground from "@/components/playground/PlaygroundForm";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import { loadDefaultState } from "@/lib/api/LoadDefaults";
 
 export default function Home() {
   return (
@@ -10,7 +11,7 @@ export default function Home() {
         <ThemeToggle />
       </header>
 
-      <Playground />
+      <Playground defaultState={loadDefaultState()} />
     </main>
   );
 }

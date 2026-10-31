@@ -6,24 +6,6 @@ import Controls from "./Controls";
 import ResponseSection from "./ResponsesSection";
 import PromptSection from "./PromptSection";
 
-function loadDefaultState(): State {
-  const baseUrl = process.env.BASE_URL || "";
-  const apiKey = process.env.API_KEY || "";
-  const model = process.env.DEFAULT_MODEL || null;
-
-  return {
-    model,
-    baseUrl,
-    apiKey,
-    temperature: null,
-    maxTokens: null,
-    topP: null,
-    topK: null,
-    prompt: "",
-    response: "",
-  } as State;
-}
-
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "SET_MODEL":
@@ -49,10 +31,10 @@ export function reducer(state: State, action: Action): State {
   }
 }
 
-export default function Playground() {
-  const [firstState, firstDispatch] = useReducer(reducer, loadDefaultState());
+export default function Playground({ defaultState }: { defaultState: State }) {
+  const [firstState, firstDispatch] = useReducer(reducer, defaultState);
 
-  const [secondState, secondDispatch] = useReducer(reducer, loadDefaultState());
+  const [secondState, secondDispatch] = useReducer(reducer, defaultState);
 
   return (
     <div className="flex flex-col items-start justify-start gap-4 mt-8 w-full">

@@ -17,4 +17,5 @@ export const models: Model[] = [
   { label: "llama-3.1-405b-instruct", value: "meta-llama/llama-3.1-405b-instruct" },
   { label: "mistral-large", value: "mistralai/mistral-large" },
   { label: "deepseek-chat", value: "deepseek-chat" },
+  { label: "gemma-4-26b-a4b-it", value: "gemma-4-26b-a4b-it" },
 ];

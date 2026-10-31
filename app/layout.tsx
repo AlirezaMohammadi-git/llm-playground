@@ -36,7 +36,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         "flex min-h-screen w-full flex-col p-6 sm:p-8",
       )}
     >
-      <body className="min-h-full flex flex-col dark">
+      <head />
+      <body className="min-h-full flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           {children}
         </ThemeProvider>
