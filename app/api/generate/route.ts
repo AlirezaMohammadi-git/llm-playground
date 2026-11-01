@@ -1,7 +1,7 @@
 // app/api/generate/route.ts
 
 import { NextResponse } from "next/server";
-import { generate } from "@/lib/api/generate";
+import { generate } from "@/lib/api/Generate";
 import { GenerateSchema } from "@/lib/validation/request";
 
 export async function POST(request: Request) {

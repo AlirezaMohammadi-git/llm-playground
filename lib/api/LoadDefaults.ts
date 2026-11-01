@@ -1,8 +1,8 @@
-import { State } from "../types";
+import { State } from "../../types";
 
 export function loadDefaultState(): State {
-  const baseUrl = process.env.BASE_URL || "";
-  const apiKey = process.env.API_KEY || "";
+  const baseUrl = process.env.AVALAI_BASE_URL || "";
+  const apiKey = process.env.AVALAI_API_KEY || "";
   const model = process.env.DEFAULT_MODEL || null;
 
   return {
@@ -13,7 +13,7 @@ export function loadDefaultState(): State {
     maxTokens: null,
     topP: null,
     topK: null,
-    prompt: "",
+    prompt: null,
     response: "",
   } as State;
 }

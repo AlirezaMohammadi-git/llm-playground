@@ -1,4 +1,4 @@
-import { Model } from "./types";
+import { Model } from "../types";
 
 export { cn } from "cn";
 

@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Action, State } from "@/lib/types";
+import { Action, State } from "@/types";
 import { models } from "@/lib/utils";
 
 export default function Controls({

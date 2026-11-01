@@ -1,10 +1,62 @@
 "use client";
 
-import { Action, State } from "@/lib/types";
-import { useReducer } from "react";
+import { Action, State } from "@/types";
+import { ActionDispatch, createContext, useContext, useReducer, useState } from "react";
 import Controls from "./Controls";
 import ResponseSection from "./ResponsesSection";
 import PromptSection from "./PromptSection";
+import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "../ui/item";
+import { CircleAlert } from "lucide-react";
+
+// ############ Context to manage UI events and state ##########################################
+const UIEventsContext = createContext<{
+  firstState: State;
+  secondState: State;
+  loading: boolean;
+  error: string | null;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  firstDispatch: ActionDispatch<[action: Action]>;
+  secondDispatch: ActionDispatch<[action: Action]>;
+} | null>(null);
+export function UIEventsProvider({
+  children,
+  defaultState,
+}: {
+  children: React.ReactNode;
+  defaultState: State;
+}) {
+  const [firstState, firstDispatch] = useReducer(reducer, defaultState);
+  const [secondState, secondDispatch] = useReducer(reducer, defaultState);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  return (
+    <UIEventsContext.Provider
+      value={{
+        firstState,
+        secondState,
+        loading,
+        error,
+        setLoading,
+        setError,
+        firstDispatch,
+        secondDispatch,
+      }}
+    >
+      {children}
+    </UIEventsContext.Provider>
+  );
+}
+export function useUIEvents() {
+  const context = useContext(UIEventsContext);
+  if (!context) {
+    throw new Error("useUIEvents must be used within a UIEventsProvider");
+  }
+  return context;
+}
+
+// ############ Main Playground Component ##########################################
 
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -30,15 +82,18 @@ export function reducer(state: State, action: Action): State {
       return state;
   }
 }
-
 export default function Playground({ defaultState }: { defaultState: State }) {
-  const [firstState, firstDispatch] = useReducer(reducer, defaultState);
+  return (
+    <UIEventsProvider defaultState={defaultState}>
+      <PlaygroundForm />
+    </UIEventsProvider>
+  );
+}
 
-  const [secondState, secondDispatch] = useReducer(reducer, defaultState);
-
+function PlaygroundForm() {
+  const { firstState, secondState, error, firstDispatch, secondDispatch } = useUIEvents();
   return (
     <div className="flex flex-col items-start justify-start gap-4 mt-8 w-full">
-      <h2 className="text-2xl font-extrabold mt-16">Controls</h2>
       <div className="flex flex items-start justify-start gap-4 mt-4 w-full">
         <Controls state={firstState} dispatch={firstDispatch} />
         <Controls state={secondState} dispatch={secondDispatch} />
@@ -51,16 +106,30 @@ export default function Playground({ defaultState }: { defaultState: State }) {
         secondDispatch={secondDispatch}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-        <ResponseSection
-          state={firstState}
-          numberOfResponses={1}
-          hide={firstState.response === ""}
-        />
-        <ResponseSection
-          state={secondState}
-          numberOfResponses={2}
-          hide={secondState.response === ""}
-        />
+        {error ? (
+          <Item variant="outline" size="sm">
+            <ItemMedia variant="icon">
+              <CircleAlert />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>Error</ItemTitle>
+              <ItemDescription>An error occurred while processing your request.</ItemDescription>
+            </ItemContent>
+          </Item>
+        ) : (
+          <>
+            <ResponseSection
+              state={firstState}
+              numberOfResponses={1}
+              hide={error !== null || firstState.response === ""}
+            />
+            <ResponseSection
+              state={secondState}
+              numberOfResponses={2}
+              hide={error !== null || secondState.response === ""}
+            />
+          </>
+        )}
       </div>
       <div className="mb-64"></div>
     </div>

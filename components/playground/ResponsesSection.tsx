@@ -1,7 +1,7 @@
 "use client";
 
 import { Textarea } from "@/components/ui/textarea";
-import { State, Action } from "@/lib/types";
+import { State, Action } from "@/types";
 
 export default function ResponseSection({
   state,
