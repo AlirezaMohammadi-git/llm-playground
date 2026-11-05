@@ -32,6 +32,16 @@ export function getApiRequests(): ApiRequest[] {
   }
 }
 
+export function getLastApiRequest(): ApiRequest | null {
+  const requests = getApiRequests();
+
+  if (requests.length === 0) {
+    return null;
+  }
+
+  return requests[requests.length - 1];
+}
+
 async function saveApiRequests(requests: ApiRequest[]): Promise<void> {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(requests));

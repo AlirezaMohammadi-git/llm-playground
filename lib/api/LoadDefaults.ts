@@ -14,6 +14,6 @@ export function loadDefaultState(): State {
     topP: null,
     topK: null,
     prompt: null,
-    response: "",
+    response: null,
   } as State;
 }

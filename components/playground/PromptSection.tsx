@@ -3,13 +3,16 @@
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { State, Action } from "@/types";
-import { ApiResponseSchema } from "@/lib/validation/request";
-import z from "zod";
+import { ApiResponse, ApiResponseSchema, ResponseResult } from "@/lib/validation/request";
 import { createApiRequests } from "@/lib/api/apiHistoryStorage";
 import { useUIEvents } from "./PlaygroundForm";
 import Loader from "../ui/loader";
 
-const fetchGenerate = async (state: State): Promise<z.infer<typeof ApiResponseSchema>> => {
+const fetchGenerate = async (
+  state: State,
+  setError: (error: string | null) => void,
+): Promise<ApiResponse> => {
+  const startTime = performance.now();
   try {
     const response = await fetch("/api/generate", {
       method: "POST",
@@ -20,21 +23,30 @@ const fetchGenerate = async (state: State): Promise<z.infer<typeof ApiResponseSc
     });
 
     if (!response.ok) {
-      console.error(
-        `API request failed with status ${response.status}. Error: ${await response.text()}`,
-      );
-      throw new Error(`API request failed with status ${response.status}`);
+      setError(`API request failed with status ${response.status}`);
+      return { success: false, result: null };
     }
 
     const data = await response.json();
     const parsedData = ApiResponseSchema.safeParse(data); // Validate the response against the schema
     if (!parsedData.success) {
-      console.error("API response validation failed:", parsedData.error);
-      throw new Error("API response validation failed");
+      setError("API response validation failed");
+      return { success: false, result: null };
     }
-    return parsedData.data;
+    const totalDuration = performance.now() - startTime;
+    const finalResult: ResponseResult = {
+      ...(parsedData.data.result as ResponseResult),
+      latency: totalDuration,
+    };
+    return {
+      success: true,
+      result: finalResult as ApiResponse["result"],
+    };
   } catch (error) {
-    console.error("Error during API request:", error);
+    setError(
+      "An error occurred while processing the request." +
+        (error instanceof Error ? error.message : String(error)),
+    );
     return { success: false, result: null };
   }
 };
@@ -48,32 +60,22 @@ const handleSendRequest = async (
 ) => {
   setLoading(true);
   setError(null);
-  const firstOutput = await fetchGenerate(firstState);
-  const secondOutput = await fetchGenerate(secondState);
+  const firstOutput = await fetchGenerate(firstState, setError);
+  const secondOutput = await fetchGenerate(secondState, setError);
 
   try {
-    if (!firstOutput.success) {
-      setError("An error occurred while processing the first request.");
-      firstDispatch({
-        type: "SET_RESPONSE",
-        payload: `Error: ${JSON.stringify(firstOutput.result)}`,
-      });
-    } else {
-      firstDispatch({ type: "SET_RESPONSE", payload: firstOutput.result?.output_text || "" });
+    if (firstOutput.success) {
+      firstDispatch({ type: "SET_RESPONSE", payload: firstOutput.result });
     }
 
-    if (!secondOutput.success) {
-      setError("An error occurred while processing the second request.");
-      secondDispatch({
-        type: "SET_RESPONSE",
-        payload: `Error: ${JSON.stringify(secondOutput.result)}`,
-      });
-    } else {
-      secondDispatch({ type: "SET_RESPONSE", payload: secondOutput.result?.output_text || "" });
+    if (secondOutput.success) {
+      secondDispatch({ type: "SET_RESPONSE", payload: secondOutput.result });
     }
   } catch (error) {
-    console.error("Error during API request:", error);
-    setError("An error occurred while processing the request.");
+    setError(
+      "An error occurred while processing the request." +
+        (error instanceof Error ? error.message : String(error)),
+    );
   } finally {
     if (firstOutput.success && secondOutput.success && firstOutput.result && secondOutput.result) {
       // Save both requests to history if both are successful

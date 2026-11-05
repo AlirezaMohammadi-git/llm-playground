@@ -1,11 +1,25 @@
 ## Todo List for this project
 
-- [x] Implement settings UI
-- [x] Fix : AI output is unreadable for each prompt!
-- [x] Save previous request info (prompt, settings, pricing, etc.)
-- [ ] Calculate input/output tokens inApp and show them. (separate inapp/api calculations)
-- [ ] Calculate latency and show it
-- [ ] Calculate price
-- [ ] Add Loading, Error, Not found handlers.
-
-### Current Task
+- [x] Token display
+  - [x] input tokens
+  - [x] output tokens
+  - [x] total tokens
+- [x] Latency
+  - [x] measure request duration
+  - [x] display it for each model
+- [ ] Cost
+  - [x] display estimated cost
+- [x] History
+  - [x] SQLite or even JSON is enough
+  - [x] save prompt, model, parameters, response, tokens, latency, cost, timestamp
+- [x] Repeat experiment (Have a bug = after a response shows, Generate btn disables)
+  - [x] same prompt + same model + same parameters
+  - [x] ideally allow changing temperature
+  - [x] show outputs side by side
+- [ ] Fix the model typing
+- [ ] Improve README
+  - [ ] what you learned
+  - [ ] screenshots/GIF
+  - [ ] architecture
+  - [ ] how to run it
+  - [ ] an example temperature experiment

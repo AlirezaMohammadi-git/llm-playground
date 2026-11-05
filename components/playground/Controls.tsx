@@ -134,7 +134,6 @@ function Fields({ state, dispatch }: { state: State; dispatch: React.Dispatch<Ac
                   />
                 </Field>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <Field>
                   <FieldLabel htmlFor="model-top-p">Top P</FieldLabel>

@@ -35,27 +35,33 @@ export const OutputItemSchema = z.object({
 });
 
 export const InputTokensDetailsSchema = z.object({
-  audio_tokens: z.number().nullable(),
-  cached_tokens: z.number(),
-  cached_tokens_details: z.unknown().nullable(),
-  image_tokens: z.number().nullable(),
-  text_tokens: z.number(),
-  video_tokens: z.number().nullable(),
-  cache_write_tokens: z.number(),
+  audio_tokens: z.number().nullable().optional(),
+  cached_tokens: z.number().optional().default(0),
+  cached_tokens_details: z.unknown().nullable().optional(),
+  image_tokens: z.number().nullable().optional(),
+  text_tokens: z.number().nullable().optional(),
+  video_tokens: z.number().nullable().optional(),
+  cache_write_tokens: z.number().nullable().optional(),
 });
 
 export const OutputTokensDetailsSchema = z.object({
-  audio_tokens: z.number().nullable(),
-  reasoning_tokens: z.number(),
-  text_tokens: z.number(),
+  audio_tokens: z.number().nullable().optional(),
+  reasoning_tokens: z.number().nullable().optional(),
+  text_tokens: z.number().nullable().optional(),
 });
 
 export const UsageSchema = z.object({
   input_tokens: z.number(),
-  input_tokens_details: InputTokensDetailsSchema,
+  input_tokens_details: InputTokensDetailsSchema.optional(),
   output_tokens: z.number(),
-  output_tokens_details: OutputTokensDetailsSchema,
+  output_tokens_details: OutputTokensDetailsSchema.nullable().optional(),
   total_tokens: z.number(),
+});
+
+export const EstimatedCostSchema = z.object({
+  unit: z.string(),
+  irt: z.number(),
+  exchange_rate: z.number(),
 });
 
 // ============================================================================
@@ -123,9 +129,15 @@ export const ResponseResultSchema = z.object({
   text: z.record(z.string(), z.unknown()),
   truncation: z.unknown().nullable(),
   usage: UsageSchema,
+  estimated_cost: EstimatedCostSchema.nullable().optional(),
   service_tier: z.string(),
   output_text: z.string(),
-  prompt: z.string().nullable().optional(),
+  // پشتیبانی از رشته، آبجکت رکورد، یا null/undefined بودن پرامپت
+  prompt: z
+    .union([z.string(), z.record(z.string(), z.unknown())])
+    .nullable()
+    .optional(),
+  latency: z.number().nullable().optional(),
 });
 
 export const ApiResponseSchema = z.object({
@@ -144,5 +156,6 @@ export type ChatCompletionResponse = z.infer<typeof ChatCompletionResponseSchema
 export type ContentItem = z.infer<typeof ContentItemSchema>;
 export type OutputItem = z.infer<typeof OutputItemSchema>;
 export type UsageDetails = z.infer<typeof UsageSchema>;
+export type EstimatedCost = z.infer<typeof EstimatedCostSchema>;
 export type ResponseResult = z.infer<typeof ResponseResultSchema>;
 export type ApiResponse = z.infer<typeof ApiResponseSchema>;

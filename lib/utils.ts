@@ -18,4 +18,5 @@ export const models: Model[] = [
   { label: "mistral-large", value: "mistralai/mistral-large" },
   { label: "deepseek-chat", value: "deepseek-chat" },
   { label: "gemma-4-26b-a4b-it", value: "gemma-4-26b-a4b-it" },
+  { label: "cf.granite-4.0-h-micro", value: "cf.granite-4.0-h-micro" },
 ];

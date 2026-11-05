@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LLM Playground
 
-## Getting Started
+یک محیط ساده برای مقایسه‌ی پاسخ دو پیکربندی مدل زبانی با یک prompt مشترک. می‌توانید پارامترهایی مثل `Temperature` را جداگانه تنظیم کنید و پاسخ‌ها، زمان پاسخ‌گویی، تعداد tokenها و هزینه‌ی تخمینی را کنار هم ببینید.
 
-First, run the development server:
+## What You learned
+
+- تغییر `Temperature` می‌تواند روی میزان تنوع و قابل‌پیش‌بینی بودن خروجی مدل اثر بگذارد؛ مقدار پایین‌تر معمولاً خروجی متمرکزتری می‌دهد و مقدار بالاتر می‌تواند پاسخ‌های متنوع‌تری ایجاد کند.
+- برای مقایسه‌ی معنادار، prompt و سایر تنظیمات را ثابت نگه دارید و هر بار فقط یک پارامتر را تغییر دهید.
+- `Latency` در این پروژه مدت زمان درخواست از مرورگر تا دریافت پاسخ از API است؛ بنابراین علاوه بر مدل و سرویس، به شبکه هم وابسته است.
+- تعداد tokenهای مصرف‌شده از `Usage` پاسخ API خوانده می‌شود و هزینه، در صورت ارائه شدن در پاسخ، به شکل تخمینی نمایش داده می‌شود.
+- تنظیمات یکسان و prompt مشترک امکان مقایسه‌ی مستقیم دو پاسخ را فراهم می‌کند، اما خروجی مدل‌های زبانی ذاتاً ممکن است بین اجراها متفاوت باشد.
+
+## Architecture
+
+- **Frontend** — رابط `Next.js App Router` در `app/` و کامپوننت‌های تعاملی در `components/`؛ دو مجموعه کنترل برای انتخاب مدل و تنظیم پارامترها و دو بخش پاسخ برای نمایش مقایسه.
+- **Request flow** — `PromptSection` دو درخواست را به‌ترتیب به `POST /api/generate` می‌فرستد. route در `app/api/generate/route.ts` ورودی را با `Zod` اعتبارسنجی می‌کند و `lib/api/Generate.ts` درخواست را با `OpenAI SDK` ارسال می‌کند.
+- **Provider configuration** — نشانی سرویس و کلید از متغیرهای محیطی سمت سرور خوانده می‌شوند. رابط کاربری نیز فیلدهای Base URL و API Key دارد، اما کلاینت فعلی در سرور از مقادیر environment استفاده می‌کند.
+- **Response metrics** — پاسخ شامل متن و `Usage` است؛ مدت درخواست در کلاینت اندازه‌گیری می‌شود. اطلاعات پاسخ و تنظیمات استفاده‌شده در دو پنل کنار هم نمایش داده می‌شوند.
+- **History** — تاریخچه در `localStorage` مرورگر ذخیره می‌شود و از صفحه‌ی `/history` قابل مشاهده و پاک‌کردن است؛ داده‌ها در دیتابیس سرور ذخیره نمی‌شوند.
+- **Validation and UI** — `lib/validation/request.ts` schemaهای ورودی و خروجی را تعریف می‌کند؛ رابط با `Tailwind CSS` و کامپوننت‌های پروژه ساخته شده است.
+
+## How to run it
+
+پیش‌نیازها: `Node.js` و `pnpm` (نسخه‌ی مورد انتظار پروژه در `package.json` مشخص شده است).
+
+1. وابستگی‌ها را نصب کنید:
+
+   ```bash
+   pnpm install
+   ```
+
+2. در ریشه‌ی پروژه، فایل `.env.local` بسازید و تنظیمات سرویس `OpenAI-compatible` خود را وارد کنید:
+
+   ```dotenv
+   AVALAI_BASE_URL=https://your-provider.example/v1
+   AVALAI_API_KEY=your-api-key
+   DEFAULT_MODEL=openai/gpt-4o-mini
+   ```
+
+   `DEFAULT_MODEL` اختیاری است؛ در صورت تنظیم، به‌عنوان مدل پیش‌فرض انتخاب می‌شود. `AVALAI_BASE_URL` و `AVALAI_API_KEY` برای اتصال سرور به provider لازم هستند. کلید را در متغیر محیطی سرور نگه دارید و آن را در مخزن commit نکنید.
+
+3. سرور توسعه را اجرا کنید:
+
+   ```bash
+   pnpm dev
+   ```
+
+4. در مرورگر به [http://localhost:3000](http://localhost:3000) بروید، برای هر پنل یک مدل و پارامتر انتخاب کنید و prompt را اجرا کنید. صفحه‌ی تاریخچه در مسیر `/history` قرار دارد.
+
+برای بررسی نسخه‌ی production:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm build
+pnpm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## An example temperature experiment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. در پنل اول و دوم، یک `Model` یکسان انتخاب کنید و سایر پارامترها را تا جای ممکن یکسان نگه دارید.
+2. برای هر دو پنل از prompt یکسان استفاده می‌شود. برای نمونه:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   > Write a four-line story about a lighthouse during a storm.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. در پنل اول مقدار `Temperature` را روی `0.2` و در پنل دوم روی `1.2` بگذارید.
+4. روی **Generate** بزنید و دو پاسخ را کنار هم بخوانید. مقایسه کنید که کدام خروجی متمرکزتر یا متنوع‌تر به نظر می‌رسد؛ همچنین `Latency` و تعداد tokenها را مشاهده کنید.
+5. اگر می‌خواهید آزمایش را تکرار کنید، prompt و تنظیمات را ثابت نگه دارید و فقط `Temperature` را تغییر دهید. به‌علت تغییرپذیری طبیعی مدل‌ها، چند بار اجرا کنید و از یک پاسخ منفرد نتیجه‌گیری قطعی نکنید.

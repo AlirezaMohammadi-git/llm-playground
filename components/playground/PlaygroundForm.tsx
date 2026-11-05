@@ -1,7 +1,7 @@
 "use client";
 
 import { Action, State } from "@/types";
-import { ActionDispatch, createContext, useContext, useReducer, useState } from "react";
+import { ActionDispatch, createContext, useContext, useMemo, useReducer, useState } from "react";
 import Controls from "./Controls";
 import ResponseSection from "./ResponsesSection";
 import PromptSection from "./PromptSection";
@@ -19,35 +19,35 @@ const UIEventsContext = createContext<{
   firstDispatch: ActionDispatch<[action: Action]>;
   secondDispatch: ActionDispatch<[action: Action]>;
 } | null>(null);
-export function UIEventsProvider({
-  children,
-  defaultState,
-}: {
+
+type UIEventsProviderProps = {
   children: React.ReactNode;
   defaultState: State;
-}) {
+};
+
+export function UIEventsProvider({ children, defaultState }: UIEventsProviderProps) {
   const [firstState, firstDispatch] = useReducer(reducer, defaultState);
   const [secondState, secondDispatch] = useReducer(reducer, defaultState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  return (
-    <UIEventsContext.Provider
-      value={{
-        firstState,
-        secondState,
-        loading,
-        error,
-        setLoading,
-        setError,
-        firstDispatch,
-        secondDispatch,
-      }}
-    >
-      {children}
-    </UIEventsContext.Provider>
+  const memoizedValue = useMemo(
+    () => ({
+      firstState,
+      secondState,
+      loading,
+      error,
+      setLoading,
+      setError,
+      firstDispatch,
+      secondDispatch,
+    }),
+    [firstState, secondState, loading, error],
   );
+
+  return <UIEventsContext.Provider value={memoizedValue}>{children}</UIEventsContext.Provider>;
 }
+
 export function useUIEvents() {
   const context = useContext(UIEventsContext);
   if (!context) {
@@ -121,12 +121,12 @@ function PlaygroundForm() {
             <ResponseSection
               state={firstState}
               numberOfResponses={1}
-              hide={error !== null || firstState.response === ""}
+              hide={error !== null || firstState?.response === null}
             />
             <ResponseSection
               state={secondState}
               numberOfResponses={2}
-              hide={error !== null || secondState.response === ""}
+              hide={error !== null || secondState?.response === null}
             />
           </>
         )}
