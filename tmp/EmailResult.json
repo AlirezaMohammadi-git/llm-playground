@@ -1,0 +1,78 @@
+{
+  "email_input": "Hi, I bought a wireless mouse from you guys last Tuesday (Order #98765), but the scroll wheel isn't working at all right out of the box. Can I get a replacement sent out, or do I need to return it for a refund? Thanks, Sarah.",
+  "email_output": {
+    "ticket_type": "product_defect",
+    "order_number": "98765",
+    "customer_name": "Sarah",
+    "purchase_timeframe": "last Tuesday",
+    "issue": "Wireless mouse scroll wheel is not working out of the box",
+    "requested_resolution": "replacement or refund"
+  },
+
+  "resume_input": `Alex Johnson - Software Engineer
+San Francisco, CA | alex@email.com | 555-0192
+Experience:
+- Senior Developer at TechCorp (2020-Present): Led a team of 5 to build microservices using Node.js and TypeScript, reducing latency by 40%.
+- Junior Dev at WebSolutions (2018-2020): Built REST APIs and managed PostgreSQL databases.
+Education: B.S. in Computer Science, UC Berkeley (2018).`,
+  "resume_output": {
+    "personal_info": {
+      "name": "Alex Johnson",
+      "title": "Software Engineer",
+      "location": "San Francisco, CA",
+      "email": "alex@email.com",
+      "phone": "555-0192"
+    },
+    "experience": [
+      {
+        "role": "Senior Developer",
+        "company": "TechCorp",
+        "period": "2020-Present",
+        "highlights": [
+          "Led a team of 5 to build microservices using Node.js and TypeScript",
+          "Reduced latency by 40%"
+        ]
+      },
+      {
+        "role": "Junior Dev",
+        "company": "WebSolutions",
+        "period": "2018-2020",
+        "highlights": ["Built REST APIs", "Managed PostgreSQL databases"]
+      }
+    ],
+    "education": {
+      "degree": "B.S. in Computer Science",
+      "institution": "UC Berkeley",
+      "year": "2018"
+    }
+  },
+
+  "invoice_input": `INVOICE #INV-2026-001
+Date: November 7, 2026
+Billed To: Acme Corp
+Items:
+- Cloud Hosting (Oct 2026): $150.00
+- Domain Renewal: $15.00
+- Custom Development (5 hours @ $50/hr): $250.00
+Total Due: $415.00`,
+  "invoice_output": {
+    "invoice_number": "INV-2026-001",
+    "date": "2026-11-07",
+    "billed_to": "Acme Corp",
+    "items": [
+      {
+        "description": "Cloud Hosting (Oct 2026)",
+        "amount": 150.0
+      },
+      {
+        "description": "Domain Renewal",
+        "amount": 15.0
+      },
+      {
+        "description": "Custom Development (5 hours @ $50/hr)",
+        "amount": 250.0
+      }
+    ],
+    "total_due": 415.0
+  }
+}

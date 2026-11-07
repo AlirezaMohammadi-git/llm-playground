@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
-import { ResponseResultSchema } from "@/lib/validation/request";
+import { ResponseResultSchema } from "@/lib/validation/requestValidator";
 
 type ApiRequestType = z.infer<typeof ResponseResultSchema>;
 
@@ -26,8 +26,8 @@ export default function HistoryPage() {
     }
   }, []);
 
-  const handleClearHistory = () => {
-    clearApiRequests();
+  const handleClearHistory = async () => {
+    await clearApiRequests();
     setApiRequests([]); // به‌روزرسانی State بدون نیاز به reload کامل صفحه
   };
 
@@ -38,7 +38,7 @@ export default function HistoryPage() {
 
   return (
     <div className="p-6">
-      <Button variant="ghost" className="mb-4" onClick={() => router.back()}>
+      <Button variant="outline" className="mb-4" onClick={() => router.back()}>
         <ArrowLeft className="h-4 w-4 mr-2" />
         Back
       </Button>

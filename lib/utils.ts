@@ -1,8 +1,6 @@
-import { Model } from "../types";
-
 export { cn } from "cn";
 
-export const models: Model[] = [
+export const models = [
   { label: "choose a model", value: null },
   { label: "gpt-6-luna", value: "openai/gpt-6-luna" },
   { label: "claude-opus-5.5", value: "anthropic/claude-opus-5.5" },

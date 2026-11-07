@@ -1,4 +1,4 @@
-## Todo List for this project
+## Checkpoint 2
 
 - [x] Token display
   - [x] input tokens
@@ -7,7 +7,7 @@
 - [x] Latency
   - [x] measure request duration
   - [x] display it for each model
-- [ ] Cost
+- [x] Cost
   - [x] display estimated cost
 - [x] History
   - [x] SQLite or even JSON is enough
@@ -16,10 +16,12 @@
   - [x] same prompt + same model + same parameters
   - [x] ideally allow changing temperature
   - [x] show outputs side by side
-- [ ] Fix the model typing
-- [ ] Improve README
-  - [ ] what you learned
-  - [ ] screenshots/GIF
-  - [ ] architecture
-  - [ ] how to run it
-  - [ ] an example temperature experiment
+- [x] Fix the model typing
+- [x] Improve README
+  - [x] what you learned
+  - [x] screenshots/GIF
+  - [x] architecture
+  - [x] how to run it
+  - [x] an example temperature experiment
+
+## Checkpoint 3

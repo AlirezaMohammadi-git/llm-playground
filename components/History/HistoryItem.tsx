@@ -1,6 +1,6 @@
 "use client";
 
-import { ResponseResultSchema } from "@/lib/validation/request";
+import { ResponseResultSchema } from "@/lib/validation/requestValidator";
 import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 
@@ -12,6 +12,22 @@ export default function HistoryItem({ request }: HistoryItemProps) {
   if (!request) {
     return null;
   }
+
+  const formatPrompt = (prompt: unknown) => {
+    if (typeof prompt === "string") {
+      return prompt || "No prompt recorded";
+    }
+
+    if (prompt == null) {
+      return "No prompt recorded";
+    }
+
+    try {
+      return JSON.stringify(prompt, null, 2);
+    } catch {
+      return String(prompt);
+    }
+  };
 
   const formattedDate = new Date(request.created_at).toLocaleString("en-US", {
     dateStyle: "medium",
@@ -50,7 +66,7 @@ export default function HistoryItem({ request }: HistoryItemProps) {
       </div>
 
       <p className="mt-2 text-sm">
-        <strong>Prompt:</strong> {request.prompt || "No prompt recorded"}
+        <strong>Prompt:</strong> {formatPrompt(request.prompt) || "No prompt recorded"}
       </p>
 
       <p className="mt-2 text-sm">

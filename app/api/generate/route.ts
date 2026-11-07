@@ -2,7 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { generate } from "@/lib/api/Generate";
-import { GenerateSchema } from "@/lib/validation/request";
+import { GenerateSchema } from "@/lib/validation/requestValidator";
 
 export async function POST(request: Request) {
   try {

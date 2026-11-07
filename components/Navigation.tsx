@@ -11,6 +11,9 @@ export default function NavigationBar() {
         <Button variant="outline" onClick={() => (window.location.href = "/history")}>
           History
         </Button>
+        <Button variant="outline" onClick={() => (window.location.href = "/extract-data")}>
+          Data Extractor
+        </Button>
         <ThemeToggle />
       </div>
     </nav>

@@ -1,7 +1,7 @@
-import { ResponseResult } from "@/lib/validation/request";
+import { ResponseResult } from "@/lib/validation/requestValidator";
 
 export type State = {
-  model: Model | null;
+  model: string | null;
   baseUrl: string;
   apiKey: string;
   temperature: number | null;
@@ -17,7 +17,7 @@ export type State = {
 };
 
 export type Action =
-  | { type: "SET_MODEL"; payload: Model | null }
+  | { type: "SET_MODEL"; payload: string | null }
   | { type: "SET_BASE_URL"; payload: string }
   | { type: "SET_API_KEY"; payload: string }
   | { type: "SET_TEMPERATURE"; payload: number | null }
@@ -26,8 +26,3 @@ export type Action =
   | { type: "SET_TOP_K"; payload: number | null }
   | { type: "SET_PROMPT"; payload: string | null }
   | { type: "SET_RESPONSE"; payload: ResponseResult | null };
-
-export type Model = {
-  label: string;
-  value: string | null;
-};
