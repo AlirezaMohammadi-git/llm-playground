@@ -3,7 +3,7 @@
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { State, Action } from "@/types";
-import { createApiRequests } from "@/lib/api/apiHistoryStorage";
+import { createApiRequests } from "@/lib/api/history/apiHistoryStorage";
 import { useUIEvents } from "./PlaygroundForm";
 import Loader from "../ui/loader";
 import { fetchGenerate } from "@/lib/api/Generate";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { clearApiRequests, getApiRequests } from "@/lib/api/apiHistoryStorage";
+import { clearApiRequests, getApiRequests } from "@/lib/api/history/apiHistoryStorage";
 import HistoryItem from "./HistoryItem";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";

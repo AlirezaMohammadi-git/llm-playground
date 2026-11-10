@@ -63,7 +63,25 @@ export const InvoiceSchema = z.object({
   total_due: z.number(),
 });
 
+export const ExtractionApiResponseSchema = z.object({
+  success: z.boolean(),
+  result: z.union([SupportEmailSchema, ResumeSchema, InvoiceSchema]).nullable(),
+  error: z.string().nullish().optional(),
+});
+
+export const DataTypeSchema = z.enum({
+  email: "EMAIL",
+  resume: "RESUME",
+  invoice: "INVOICE",
+});
+
+export const RequestExtractionInputSchema = z.object({
+  requestType: DataTypeSchema,
+  email: z.string(),
+});
+
 export type SupportEmail = z.infer<typeof SupportEmailSchema>;
 export type Resume = z.infer<typeof ResumeSchema>;
 export type Invoice = z.infer<typeof InvoiceSchema>;
 export type RequestDataExtraction = z.infer<typeof RequestDataExtractionSchema>;
+export type ExtractionApiResponse = z.infer<typeof ExtractionApiResponseSchema>;
