@@ -1,38 +1,99 @@
 import { NextResponse } from "next/server";
-import { requestExtraction } from "@/lib/api/dataExtraction/extractor";
-import { RequestExtractionInputSchema } from "@/lib/validation/extractData/dataExtractionValidator";
 import { z } from "zod";
+
+import { requestExtraction } from "@/lib/api/dataExtraction/extractor";
+import {
+  DataTypeSchema,
+  RequestExtractionInputSchema,
+} from "@/lib/validation/extractData/dataExtractionValidator";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const contentType = request.headers.get("content-type") ?? "";
 
-    const result = RequestExtractionInputSchema.safeParse(body);
+    if (contentType.includes("application/json")) {
+      const body = await request.json();
 
-    if (!result.success) {
-      console.error("Request validation failed:", result.error.issues);
+      const result = RequestExtractionInputSchema.safeParse(body);
 
-      return NextResponse.json(
-        {
-          error: "Invalid request",
-          details: z.treeifyError(result.error),
-        },
-        { status: 400 },
-      );
+      if (!result.success) {
+        console.error("Request validation failed:", result.error.issues);
+
+        return NextResponse.json(
+          {
+            error: "Invalid request",
+            details: z.treeifyError(result.error),
+          },
+          { status: 400 },
+        );
+      }
+
+      const extractionResult = await requestExtraction(result.data);
+
+      return NextResponse.json({
+        success: true,
+        result: extractionResult,
+      });
     }
 
-    const extractionResult = await requestExtraction(result.data);
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
 
-    return NextResponse.json({
-      success: true,
-      result: extractionResult,
-    });
+      const rawRequestType = formData.get("requestType");
+      const file = formData.get("file");
+
+      const requestTypeResult = DataTypeSchema.safeParse(rawRequestType);
+
+      if (!requestTypeResult.success) {
+        return NextResponse.json(
+          {
+            error: "Invalid data-type for uploaded file",
+          },
+          { status: 400 },
+        );
+      }
+
+      if (!(file instanceof File)) {
+        return NextResponse.json(
+          {
+            error: "File is required",
+          },
+          { status: 400 },
+        );
+      }
+
+      if (file.size === 0) {
+        return NextResponse.json(
+          {
+            error: "Uploaded file is empty",
+          },
+          { status: 400 },
+        );
+      }
+
+      const extractionResult = await requestExtraction({
+        requestType: requestTypeResult.data,
+        file,
+      });
+
+      return NextResponse.json({
+        success: true,
+        result: extractionResult,
+      });
+    }
+
+    return NextResponse.json(
+      {
+        error: "Unsupported Content-Type",
+      },
+      { status: 415 },
+    );
   } catch (error) {
     console.error("Request extraction failed:", error);
 
     return NextResponse.json(
       {
-        error: "Failed to generate response",
+        error: "Failed to process request",
       },
       { status: 500 },
     );

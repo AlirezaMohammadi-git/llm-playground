@@ -20,34 +20,50 @@ export const RequestDataExtractionSchema = z.object({
 
 export const SupportEmailSchema = z.object({
   ticket_type: z.string(),
-  order_number: z.string(),
-  customer_name: z.string(),
-  purchase_timeframe: z.string(),
-  issue: z.string(),
-  requested_resolution: z.string(),
+  order_number: z.string().nullable(),
+  customer_name: z.string().nullable(),
+  purchase_timeframe: z.string().nullable(),
+  issue: z.string().nullable(),
+  requested_resolution: z.string().nullable(),
 });
 
 export const ResumeSchema = z.object({
-  personal_info: z.object({
-    name: z.string(),
-    title: z.string(),
-    location: z.string(),
-    email: z.string().email(),
-    phone: z.string(),
-  }),
+  personal_info: z
+    .object({
+      name: z.string().nullable(),
+      title: z.string().nullable(),
+      location: z.string(),
+      email: z.string().nullable(),
+      phone: z.string().nullable(),
+      summary: z.string().nullable(),
+    })
+    .nullable(),
+
   experience: z.array(
-    z.object({
-      role: z.string(),
-      company: z.string(),
-      period: z.string(),
-      highlights: z.array(z.string()),
-    }),
+    z
+      .object({
+        role: z.string().nullable(),
+        company: z.string().nullable(),
+        period: z.string().nullable(),
+        highlights: z.array(z.string()).nullable(),
+      })
+      .nullable(),
   ),
-  education: z.object({
-    degree: z.string(),
-    institution: z.string(),
-    year: z.string(),
-  }),
+
+  education: z
+    .object({
+      institution: z.string().nullable(),
+      degree: z.string().nullable(),
+      field_of_study: z.string().nullable(),
+      graduation_year: z.string().nullable(),
+    })
+    .nullable(),
+
+  skills: z.array(z.string()),
+
+  certifications: z.array(z.string()),
+
+  languages: z.array(z.string()),
 });
 
 export const InvoiceSchema = z.object({
@@ -77,7 +93,11 @@ export const DataTypeSchema = z.enum({
 
 export const RequestExtractionInputSchema = z.object({
   requestType: DataTypeSchema,
-  email: z.string(),
+  email: z.string().nullable().optional(),
+  file: z
+    .union([z.instanceof(File), z.string()])
+    .nullable()
+    .optional(),
 });
 
 export type SupportEmail = z.infer<typeof SupportEmailSchema>;

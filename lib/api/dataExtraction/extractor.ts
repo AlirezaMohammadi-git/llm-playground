@@ -1,89 +1,216 @@
 "use server";
 
 import "server-only";
+
 import { getClient } from "@/lib/OpenAI/client";
 import { getExtractionInstruction } from "@/lib/prompts/instructions";
-import { loadDefaultRequest } from "../LoadDefaults";
-import { RequestExtractionInput } from "@/types/dataExtraction";
 import {
   InvoiceSchema,
   ResumeSchema,
   SupportEmailSchema,
 } from "@/lib/validation/extractData/dataExtractionValidator";
-import { ZodSafeParseResult } from "zod";
+import type { RequestExtractionInput } from "@/types/dataExtraction";
+import { loadDefaultRequest } from "../LoadDefaults";
 
-/**
- * استخراج ساختاریافته اطلاعات تیکت پشتیبانی از ایمیل
- * با استفاده از Responses API و اعتبارسنجی Zod
- */
-export async function requestExtraction(request: RequestExtractionInput) {
+type ExtractionSchema = {
+  name: string;
+  schema: Record<string, unknown>;
+};
+type ResponseInput = {
+  role: "user";
+  content:
+    | string
+    | Array<
+        | {
+            type: "input_text";
+            text: string;
+          }
+        | {
+            type: "input_file";
+            filename: string;
+            file_data: string;
+          }
+      >;
+};
+
+function getExtractionSchema(requestType: RequestExtractionInput["requestType"]): ExtractionSchema {
+  switch (requestType) {
+    case "EMAIL":
+      return {
+        name: "SupportEmailExtraction",
+        schema: SupportEmailSchema.toJSONSchema(),
+      };
+
+    case "INVOICE":
+      return {
+        name: "InvoiceExtraction",
+        schema: InvoiceSchema.toJSONSchema(),
+      };
+
+    case "RESUME":
+      return {
+        name: "ResumeExtraction",
+        schema: ResumeSchema.toJSONSchema(),
+      };
+
+    default:
+      throw new Error(`Unsupported extraction request type: ${requestType}`);
+  }
+}
+
+async function createExtractionResponse({
+  model,
+  instructions,
+  input,
+  extractionSchema,
+}: {
+  model: string;
+  instructions: string;
+  input: ResponseInput[];
+  extractionSchema: ExtractionSchema;
+}) {
   const client = await getClient();
-  const { instructions, prompt } = await getExtractionInstruction(request.requestType);
-  const defaultReq = loadDefaultRequest();
 
-  // ساخت پیام‌های ورودی مطابق با Responses API
-  // - instructions: نقش سیستم / دستورالعمل کلی
-  // - user: پرامپت وظیفه + محتوای واقعی ایمیل
-  const input = [
-    {
-      role: "system" as const,
-      content: instructions,
+  return client.responses.create({
+    model,
+    instructions,
+    input,
+    text: {
+      format: {
+        type: "json_schema",
+        name: extractionSchema.name,
+        schema: extractionSchema.schema,
+        strict: true,
+      },
     },
-    {
-      role: "user" as const,
-      content: [
-        {
-          type: "input_text" as const,
-          text: `${prompt}
+  });
+}
+
+async function buildExtractionInput(
+  request: RequestExtractionInput,
+  prompt: string,
+): Promise<ResponseInput[]> {
+  if (request.requestType === "EMAIL") {
+    if (!request.email?.trim()) {
+      throw new Error("Email content is required.");
+    }
+
+    return [
+      {
+        role: "user",
+        content: `${prompt}
 
 ---
 EMAIL CONTENT:
 ${request.email}
 ---`,
+      },
+    ];
+  }
+
+  if (!(request.file instanceof File)) {
+    throw new Error(`A file is required for ${request.requestType} extraction.`);
+  }
+
+  if (request.file.size === 0) {
+    throw new Error("Uploaded file is empty.");
+  }
+
+  const buffer = Buffer.from(await request.file.arrayBuffer());
+  const base64 = buffer.toString("base64");
+
+  return [
+    {
+      role: "user",
+      content: [
+        {
+          type: "input_file",
+          filename: request.file.name,
+          file_data: `data:application/pdf;base64,${base64}`,
+        },
+        {
+          type: "input_text",
+          text: prompt,
         },
       ],
     },
   ];
+}
 
-  const response = await client.responses.create({
-    model: defaultReq.model,
-    temperature: 0.1,
-    // در Responses API بهتر است instructions را جداگانه هم ارسال کنیم
-    // تا مدل آن را به‌عنوان system prompt قوی‌تر در نظر بگیرد
-    instructions: instructions,
+function getValidationSchema(requestType: RequestExtractionInput["requestType"]) {
+  switch (requestType) {
+    case "EMAIL":
+      return SupportEmailSchema;
+
+    case "INVOICE":
+      return InvoiceSchema;
+
+    case "RESUME":
+      return ResumeSchema;
+
+    default:
+      throw new Error(`Unsupported extraction request type: ${requestType}`);
+  }
+}
+
+function parseAndValidateExtraction(
+  output: string | undefined,
+  requestType: RequestExtractionInput["requestType"],
+) {
+  const stringData = output?.trim();
+
+  if (!stringData) {
+    throw new Error("AI returned an empty response.");
+  }
+
+  let data: unknown;
+
+  try {
+    data = JSON.parse(stringData);
+  } catch (error) {
+    console.error("Failed to parse AI response:", {
+      output: stringData,
+      error,
+    });
+
+    throw new Error("AI returned invalid JSON.");
+  }
+
+  const result = getValidationSchema(requestType).safeParse(data);
+
+  if (!result.success) {
+    console.error("AI response validation failed:", {
+      requestType,
+      issues: result.error.issues,
+    });
+
+    throw new Error(`AI returned an invalid ${requestType} extraction result.`);
+  }
+
+  return result.data;
+}
+
+/**
+ * Extract structured data from email/document input
+ * using OpenAI Responses API + Structured Outputs + Zod.
+ */
+export async function requestExtraction(request: RequestExtractionInput) {
+  const { instructions, prompt } = await getExtractionInstruction(request.requestType);
+
+  const defaultReq = loadDefaultRequest();
+  const extractionSchema = getExtractionSchema(request.requestType);
+
+  const input = await buildExtractionInput(request, prompt);
+
+  const response = await createExtractionResponse({
+    model:
+      request.requestType === "INVOICE" || request.requestType === "RESUME"
+        ? "gpt-5.6-luna"
+        : defaultReq.model,
+    instructions,
     input,
-    // اگر مدل شما از Structured Outputs پشتیبانی می‌کند، این بخش را فعال کنید:
-    text: {
-      format: {
-        type: "json_schema",
-        name: "SupportEmailExtraction",
-        schema: SupportEmailSchema.toJSONSchema(),
-        strict: true,
-      },
-    },
+    extractionSchema,
   });
 
-  const stringData = response.output_text;
-  const data = JSON.parse(stringData);
-  let validated: ZodSafeParseResult<unknown>;
-
-  switch (request.requestType) {
-    case "EMAIL":
-      validated = SupportEmailSchema.safeParse(data);
-      break;
-    case "INVOICE":
-      validated = InvoiceSchema.safeParse(data);
-      break;
-    case "RESUME":
-      validated = ResumeSchema.safeParse(data);
-      break;
-    default:
-      throw new Error("Unsupported extraction request type.");
-  }
-
-  if (!validated.success) {
-    throw new Error("AI responsed invalid format." + ` - Error: ${validated.error}`);
-  }
-
-  return validated.data;
+  return parseAndValidateExtraction(response.output_text, request.requestType);
 }
