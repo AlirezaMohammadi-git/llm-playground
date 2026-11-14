@@ -9,30 +9,16 @@ import {
   ResumeSchema,
   SupportEmailSchema,
 } from "@/lib/validation/extractData/dataExtractionValidator";
-import type { RequestExtractionInput } from "@/types/dataExtraction";
+import type { ExtractionSchema, RequestExtractionInput } from "@/types/dataExtraction";
 import { loadDefaultRequest } from "../LoadDefaults";
+import type { ResponseInputItem } from "openai/resources/responses/responses";
 
-type ExtractionSchema = {
-  name: string;
-  schema: Record<string, unknown>;
-};
-type ResponseInput = {
-  role: "user";
-  content:
-    | string
-    | Array<
-        | {
-            type: "input_text";
-            text: string;
-          }
-        | {
-            type: "input_file";
-            filename: string;
-            file_data: string;
-          }
-      >;
-};
+async function fileToDataUrl(file: File): Promise<string> {
+  const bytes = await file.arrayBuffer();
+  const base64 = Buffer.from(bytes).toString("base64");
 
+  return `data:${file.type};base64,${base64}`;
+}
 function getExtractionSchema(requestType: RequestExtractionInput["requestType"]): ExtractionSchema {
   switch (requestType) {
     case "EMAIL":
@@ -57,7 +43,6 @@ function getExtractionSchema(requestType: RequestExtractionInput["requestType"])
       throw new Error(`Unsupported extraction request type: ${requestType}`);
   }
 }
-
 async function createExtractionResponse({
   model,
   instructions,
@@ -66,7 +51,7 @@ async function createExtractionResponse({
 }: {
   model: string;
   instructions: string;
-  input: ResponseInput[];
+  input: ResponseInputItem[];
   extractionSchema: ExtractionSchema;
 }) {
   const client = await getClient();
@@ -85,11 +70,10 @@ async function createExtractionResponse({
     },
   });
 }
-
 async function buildExtractionInput(
   request: RequestExtractionInput,
   prompt: string,
-): Promise<ResponseInput[]> {
+): Promise<ResponseInputItem[]> {
   if (request.requestType === "EMAIL") {
     if (!request.email?.trim()) {
       throw new Error("Email content is required.");
@@ -98,26 +82,54 @@ async function buildExtractionInput(
     return [
       {
         role: "user",
-        content: `${prompt}
+        content: [
+          {
+            type: "input_text",
+            text: `${prompt}
 
 ---
+
 EMAIL CONTENT:
+
 ${request.email}
+
 ---`,
+          },
+        ],
       },
     ];
   }
 
-  if (!(request.file instanceof File)) {
+  const file = request.file;
+
+  if (!(file instanceof File)) {
     throw new Error(`A file is required for ${request.requestType} extraction.`);
   }
 
-  if (request.file.size === 0) {
+  if (file.size === 0) {
     throw new Error("Uploaded file is empty.");
   }
 
-  const buffer = Buffer.from(await request.file.arrayBuffer());
-  const base64 = buffer.toString("base64");
+  const url = await fileToDataUrl(file);
+
+  if (file.type.startsWith("image/")) {
+    return [
+      {
+        role: "user",
+        content: [
+          {
+            type: "input_image",
+            image_url: url,
+            detail: "high",
+          },
+          {
+            type: "input_text",
+            text: prompt,
+          },
+        ],
+      },
+    ];
+  }
 
   return [
     {
@@ -125,8 +137,8 @@ ${request.email}
       content: [
         {
           type: "input_file",
-          filename: request.file.name,
-          file_data: `data:application/pdf;base64,${base64}`,
+          filename: file.name,
+          file_data: url,
         },
         {
           type: "input_text",
@@ -136,7 +148,6 @@ ${request.email}
     },
   ];
 }
-
 function getValidationSchema(requestType: RequestExtractionInput["requestType"]) {
   switch (requestType) {
     case "EMAIL":
@@ -152,7 +163,6 @@ function getValidationSchema(requestType: RequestExtractionInput["requestType"])
       throw new Error(`Unsupported extraction request type: ${requestType}`);
   }
 }
-
 function parseAndValidateExtraction(
   output: string | undefined,
   requestType: RequestExtractionInput["requestType"],
@@ -190,10 +200,10 @@ function parseAndValidateExtraction(
   return result.data;
 }
 
-/**
+/****************************************************
  * Extract structured data from email/document input
  * using OpenAI Responses API + Structured Outputs + Zod.
- */
+ ****************************************************/
 export async function requestExtraction(request: RequestExtractionInput) {
   const { instructions, prompt } = await getExtractionInstruction(request.requestType);
 
@@ -205,7 +215,7 @@ export async function requestExtraction(request: RequestExtractionInput) {
   const response = await createExtractionResponse({
     model:
       request.requestType === "INVOICE" || request.requestType === "RESUME"
-        ? "gpt-5.6-luna"
+        ? defaultReq.model
         : defaultReq.model,
     instructions,
     input,

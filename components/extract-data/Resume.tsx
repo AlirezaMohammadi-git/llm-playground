@@ -3,119 +3,8 @@
 import { useState, useRef } from "react";
 import { Button } from "../ui/button";
 import { Loader2, Upload, FileText, X, Info } from "lucide-react";
-import { RequestExtractionInput } from "@/types/dataExtraction";
-import {
-  ExtractionApiResponse,
-  ExtractionApiResponseSchema,
-  Resume,
-  ResumeSchema,
-} from "@/lib/validation/extractData/dataExtractionValidator";
-
-export default function ResumeExtraction() {
-  const [file, setFile] = useState<File | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState<[string, string] | null>(null);
-  const [resume, setResume] = useState<Resume | null>(null);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // مدیریت انتخاب و شبیه‌سازی آپلود فایل
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] ?? null;
-    if (!file) return;
-
-    setFile(file);
-    setError(null);
-  };
-
-  // حذف فایل انتخاب شده
-  const handleRemoveFile = () => {
-    setError(null);
-    setFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  return (
-    <div className="w-full flex flex-col gap-4 max-w-2xl place-self-center p-4">
-      <h3 className="text-lg font-semibold">Raw Resume</h3>
-
-      {/* Input مخفی برای انتخاب فایل */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        className="hidden"
-        accept=".pdf,.doc,.docx,.txt,.md,image/*"
-      />
-
-      <div className="w-full grid gap-2">
-        {/* نمایش نام فایل و نوار پیشرفت هنگام آپلود */}
-        {file && (
-          <div className="flex flex-col gap-2 p-3 border rounded-md bg-muted/50">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium">{file.name}</span>
-              </div>
-              <Button variant="ghost" size="sm" onClick={handleRemoveFile} disabled={isProcessing}>
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        )}
-
-        <div className="flex flex-row gap-2">
-          <Button
-            variant={"secondary"}
-            className={"flex-1"}
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isProcessing}
-          >
-            <Upload className="w-4 h-4 mr-2" />
-            {file ? "Change file" : "Upload file"}
-          </Button>
-
-          <Button
-            variant={"default"}
-            className={"flex-1"}
-            disabled={isProcessing || !file}
-            onClick={async () => {
-              if (!file) {
-                await handleExtractRequest(setIsProcessing, file, setError, setResume);
-              } else {
-                await handleExtractRequest(setIsProcessing, file, setError, setResume);
-              }
-            }}
-          >
-            {isProcessing && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            {isProcessing ? "Thinking" : "Process"}
-          </Button>
-        </div>
-        <div
-          hidden={!error}
-          className={`flex flex-row gap-2 items-center ${error?.[0] === "" ? "hidden" : ""} `}
-        >
-          <Info className={`text-destructive w-4 h-4 ${error?.[0] === "" ? "hidden" : ""}`} />
-          <strong>
-            <p className={`text-sm text-destructive`}>{error?.[1]}</p>
-          </strong>
-        </div>
-        <div className={`${error?.[1] === "" ? "hidden" : ""} bg-card pl-5 rounded-2xl`}>
-          <p className={`text-xs text-card-foreground`}>{error?.[1]}</p>
-        </div>
-      </div>
-
-      {resume && (
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold">Result</h3>
-          <ResultSectionUI resume={resume} />
-        </div>
-      )}
-    </div>
-  );
-}
+import { Resume, ResumeSchema } from "@/lib/validation/extractData/dataExtractionValidator";
+import { fetchExtraction } from "./MainPage";
 
 async function handleExtractRequest(
   setIsProcessing: (value: boolean) => void,
@@ -170,52 +59,6 @@ async function handleExtractRequest(
     setIsProcessing(false);
   }
 }
-
-export const fetchExtraction = async (
-  rawData: RequestExtractionInput,
-): Promise<ExtractionApiResponse> => {
-  const formData = new FormData();
-
-  formData.append("requestType", rawData.requestType);
-
-  if (rawData.file) {
-    // اگر فایل از نوع File یا رشته باشد، به راحتی به FormData اضافه می‌شود
-    formData.append("file", rawData.file);
-  }
-
-  const response = await fetch("/api/extract", {
-    method: "POST",
-    // نکته مهم: هیدر Content-Type را حذف کنید تا مرورگر آن را خودکار تنظیم کند
-    body: formData,
-  });
-
-  let data: unknown;
-
-  try {
-    data = await response.json();
-  } catch {
-    throw new Error(`API returned invalid JSON. Status: ${response.status}`);
-  }
-
-  if (!response.ok) {
-    const errorData = data as Record<string, unknown>;
-    const errorMessage =
-      typeof errorData === "object" && errorData !== null && typeof errorData.error === "string"
-        ? errorData.error
-        : `API request failed with status ${response.status}`;
-
-    throw new Error(errorMessage);
-  }
-
-  const apiResponse = ExtractionApiResponseSchema.safeParse(data);
-
-  if (!apiResponse.success) {
-    console.error("Invalid extraction API response:", apiResponse.error.issues);
-    throw new Error(`Invalid extraction API response: ${apiResponse.error.message}`);
-  }
-
-  return apiResponse.data;
-};
 
 function ResultSectionUI({ resume }: { resume: Resume }) {
   if (!resume) return null;
@@ -458,5 +301,110 @@ function ResultSectionUI({ resume }: { resume: Resume }) {
         )}
       </div>
     </section>
+  );
+}
+export default function ResumeExtraction() {
+  const [file, setFile] = useState<File | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<[string, string] | null>(null);
+  const [resume, setResume] = useState<Resume | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // مدیریت انتخاب و شبیه‌سازی آپلود فایل
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    if (!file) return;
+
+    setFile(file);
+    setError(null);
+  };
+
+  // حذف فایل انتخاب شده
+  const handleRemoveFile = () => {
+    setError(null);
+    setFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  return (
+    <div className="w-full flex flex-col gap-4 max-w-2xl place-self-center p-4">
+      <h3 className="text-lg font-semibold">Raw Resume</h3>
+
+      {/* Input مخفی برای انتخاب فایل */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        className="hidden"
+        accept=".pdf,.doc,.docx,.txt,.md,image/*"
+      />
+
+      <div className="w-full grid gap-2">
+        {/* نمایش نام فایل و نوار پیشرفت هنگام آپلود */}
+        {file && (
+          <div className="flex flex-col gap-2 p-3 border rounded-md bg-muted/50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">{file.name}</span>
+              </div>
+              <Button variant="ghost" size="sm" onClick={handleRemoveFile} disabled={isProcessing}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <div className="flex flex-row gap-2">
+          <Button
+            variant={"secondary"}
+            className={"flex-1"}
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isProcessing}
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            {file ? "Change file" : "Upload file"}
+          </Button>
+
+          <Button
+            variant={"default"}
+            className={"flex-1"}
+            disabled={isProcessing || !file}
+            onClick={async () => {
+              if (!file) {
+                await handleExtractRequest(setIsProcessing, file, setError, setResume);
+              } else {
+                await handleExtractRequest(setIsProcessing, file, setError, setResume);
+              }
+            }}
+          >
+            {isProcessing && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            {isProcessing ? "Thinking" : "Process"}
+          </Button>
+        </div>
+        <div
+          hidden={!error}
+          className={`flex flex-row gap-2 items-center ${error?.[0] === "" ? "hidden" : ""} `}
+        >
+          <Info className={`text-destructive w-4 h-4 ${error?.[0] === "" ? "hidden" : ""}`} />
+          <strong>
+            <p className={`text-sm text-destructive`}>{error?.[1]}</p>
+          </strong>
+        </div>
+        <div className={`${error?.[1] === "" ? "hidden" : ""} bg-card pl-5 rounded-2xl`}>
+          <p className={`text-xs text-card-foreground`}>{error?.[1]}</p>
+        </div>
+      </div>
+
+      {resume && (
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold">Result</h3>
+          <ResultSectionUI resume={resume} />
+        </div>
+      )}
+    </div>
   );
 }

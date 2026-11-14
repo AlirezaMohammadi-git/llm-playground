@@ -23,3 +23,7 @@ export type ExtractionConfig = {
   prompt: string;
   instructions: string;
 };
+export type ExtractionSchema = {
+  name: string;
+  schema: Record<string, unknown>;
+};

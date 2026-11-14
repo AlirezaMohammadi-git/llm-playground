@@ -7,12 +7,62 @@ import {
   SupportEmailSchema,
 } from "@/lib/validation/extractData/dataExtractionValidator";
 import { Info, Loader2 } from "lucide-react";
-import {
-  ExtractionApiResponse,
-  ExtractionApiResponseSchema,
-} from "@/lib/validation/extractData/dataExtractionValidator";
-import { RequestExtractionInput } from "@/types/dataExtraction";
 import { Item, ItemContent, ItemDescription, ItemTitle } from "../ui/item";
+import { fetchExtraction } from "./MainPage";
+
+async function handleEmailProcess(
+  rawEmail: string,
+  setEmail: (supportMail: SupportEmail | null) => void,
+  setIsProcessing: (process: boolean) => void,
+  setError: (error: [string, string]) => void,
+) {
+  setIsProcessing(true);
+  try {
+    const res = await fetchExtraction({
+      requestType: "EMAIL",
+      email: rawEmail,
+    });
+
+    if (!res.success || !res.result) {
+      setError(["Failed while requesting to server.", ``]);
+      return;
+    }
+
+    const validated = SupportEmailSchema.safeParse(res.result);
+    if (!res.success && !validated.success) {
+      setError(["An error happend during process your request.", `${validated.error}`]);
+      return;
+    }
+    const mail = validated.data || null;
+    setEmail(mail);
+    return;
+  } catch (e) {
+    if (e instanceof Error) {
+      setError([`An error happend during process your request.`, e.message]);
+      return;
+    } else {
+      setError(["Request to server failed", ``]);
+      return;
+    }
+  } finally {
+    setIsProcessing(false);
+  }
+}
+
+export function SummaryItem({ title, value }: { title: string; value?: string | null }) {
+  return (
+    <div className="flex w-full flex-col gap-6">
+      <Item variant="outline" className="my-2">
+        <ItemContent>
+          <ItemTitle>{title}</ItemTitle>
+          <ItemDescription dir="rtl" className="line-clamp-none text-wrap break-words">
+            {value}
+          </ItemDescription>
+        </ItemContent>
+      </Item>
+    </div>
+  );
+}
 
 export default function EmailExtraction() {
   const [emailInput, setEmailInput] = useState("");
@@ -62,104 +112,6 @@ export default function EmailExtraction() {
         <SummaryItem title={"Issue"} value={emailResult?.issue} />
         <SummaryItem title={"Requested Resolution"} value={emailResult?.requested_resolution} />
       </div>
-    </div>
-  );
-}
-
-async function handleEmailProcess(
-  rawEmail: string,
-  setEmail: (supportMail: SupportEmail | null) => void,
-  setIsProcessing: (process: boolean) => void,
-  setError: (error: [string, string]) => void,
-) {
-  setIsProcessing(true);
-  try {
-    const res = await fetchExtraction({
-      requestType: "EMAIL",
-      email: rawEmail,
-    });
-
-    if (!res.success || !res.result) {
-      setError(["Failed while requesting to server.", ``]);
-      return;
-    }
-
-    const validated = SupportEmailSchema.safeParse(res.result);
-    if (!res.success && !validated.success) {
-      setError(["An error happend during process your request.", `${validated.error}`]);
-      return;
-    }
-    const mail = validated.data || null;
-    setEmail(mail);
-    return;
-  } catch (e) {
-    if (e instanceof Error) {
-      setError([`An error happend during process your request.`, e.message]);
-      return;
-    } else {
-      setError(["Request to server failed", ``]);
-      return;
-    }
-  } finally {
-    setIsProcessing(false);
-  }
-}
-
-export const fetchExtraction = async (
-  rawData: RequestExtractionInput,
-): Promise<ExtractionApiResponse> => {
-  const response = await fetch("/api/extract", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(rawData),
-  });
-
-  let data: unknown;
-
-  try {
-    data = await response.json();
-  } catch {
-    throw new Error(`API returned invalid JSON. Status: ${response.status}`);
-  }
-
-  console.log("Extraction API response:", data);
-
-  if (!response.ok) {
-    const errorMessage =
-      typeof data === "object" && data !== null && "error" in data && typeof data.error === "string"
-        ? data.error
-        : `API request failed with status ${response.status}`;
-
-    throw new Error(errorMessage);
-  }
-
-  /**
-   * Validate our /api/extract response wrapper.
-   */
-  const apiResponse = ExtractionApiResponseSchema.safeParse(data);
-
-  if (!apiResponse.success) {
-    console.error("Invalid extraction API response:", apiResponse.error.issues);
-
-    throw new Error(`Invalid extraction API response: ${apiResponse.error.message}`);
-  }
-
-  return apiResponse.data;
-};
-
-export function SummaryItem({ title, value }: { title: string; value?: string }) {
-  return (
-    <div className="flex w-full flex-col gap-6">
-      <Item variant="outline" className="my-2">
-        <ItemContent>
-          <ItemTitle>{title}</ItemTitle>
-          <ItemDescription dir="rtl" className="line-clamp-none text-wrap break-words">
-            {value}
-          </ItemDescription>
-        </ItemContent>
-      </Item>
     </div>
   );
 }
