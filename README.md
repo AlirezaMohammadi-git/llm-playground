@@ -1,66 +1,148 @@
 # LLM Playground
 
-یک محیط ساده برای مقایسه‌ی پاسخ دو پیکربندی مدل زبانی با یک prompt مشترک. می‌توانید پارامترهایی مثل `Temperature` را جداگانه تنظیم کنید و پاسخ‌ها، زمان پاسخ‌گویی، تعداد tokenها و هزینه‌ی تخمینی را کنار هم ببینید.
+A lightweight Next.js playground for experimenting with LLMs and extracting structured data from documents.
 
-## What You learned
+This project combines:
 
-- تغییر `Temperature` می‌تواند روی میزان تنوع و قابل‌پیش‌بینی بودن خروجی مدل اثر بگذارد؛ مقدار پایین‌تر معمولاً خروجی متمرکزتری می‌دهد و مقدار بالاتر می‌تواند پاسخ‌های متنوع‌تری ایجاد کند.
-- برای مقایسه‌ی معنادار، prompt و سایر تنظیمات را ثابت نگه دارید و هر بار فقط یک پارامتر را تغییر دهید.
-- `Latency` در این پروژه مدت زمان درخواست از مرورگر تا دریافت پاسخ از API است؛ بنابراین علاوه بر مدل و سرویس، به شبکه هم وابسته است.
-- تعداد tokenهای مصرف‌شده از `Usage` پاسخ API خوانده می‌شود و هزینه، در صورت ارائه شدن در پاسخ، به شکل تخمینی نمایش داده می‌شود.
-- تنظیمات یکسان و prompt مشترک امکان مقایسه‌ی مستقیم دو پاسخ را فراهم می‌کند، اما خروجی مدل‌های زبانی ذاتاً ممکن است بین اجراها متفاوت باشد.
+- a side-by-side model comparison UI for prompt testing
+- a browser history view for saved runs
+- a structured data extraction workspace for support emails, resumes, and invoices
+- OpenAI-compatible API integration with schema validation
 
-## Architecture
+## Features
 
-- **Frontend** — رابط `Next.js App Router` در `app/` و کامپوننت‌های تعاملی در `components/`؛ دو مجموعه کنترل برای انتخاب مدل و تنظیم پارامترها و دو بخش پاسخ برای نمایش مقایسه.
-- **Request flow** — `PromptSection` دو درخواست را به‌ترتیب به `POST /api/generate` می‌فرستد. route در `app/api/generate/route.ts` ورودی را با `Zod` اعتبارسنجی می‌کند و `lib/api/Generate.ts` درخواست را با `OpenAI SDK` ارسال می‌کند.
-- **Provider configuration** — نشانی سرویس و کلید از متغیرهای محیطی سمت سرور خوانده می‌شوند. رابط کاربری نیز فیلدهای Base URL و API Key دارد، اما کلاینت فعلی در سرور از مقادیر environment استفاده می‌کند.
-- **Response metrics** — پاسخ شامل متن و `Usage` است؛ مدت درخواست در کلاینت اندازه‌گیری می‌شود. اطلاعات پاسخ و تنظیمات استفاده‌شده در دو پنل کنار هم نمایش داده می‌شوند.
-- **History** — تاریخچه در `localStorage` مرورگر ذخیره می‌شود و از صفحه‌ی `/history` قابل مشاهده و پاک‌کردن است؛ داده‌ها در دیتابیس سرور ذخیره نمی‌شوند.
-- **Validation and UI** — `lib/validation/request.ts` schemaهای ورودی و خروجی را تعریف می‌کند؛ رابط با `Tailwind CSS` و کامپوننت‌های پروژه ساخته شده است.
+### 1) Playground
 
-## How to run it
+The main page at `/` lets you compare two LLM responses using the same prompt and different model settings.
 
-پیش‌نیازها: `Node.js` و `pnpm` (نسخه‌ی مورد انتظار پروژه در `package.json` مشخص شده است).
+Included capabilities:
 
-1. وابستگی‌ها را نصب کنید:
+- choose provider/model configuration per panel
+- set values such as `temperature`, `maxTokens`, `topP`, and `topK`
+- run two requests in parallel and inspect responses side by side
+- view timing, token usage, and estimated cost when returned by the provider
+- keep a local browser history of past requests and results
 
-   ```bash
-   pnpm install
-   ```
+### 2) History
 
-2. در ریشه‌ی پروژه، فایل `.env.local` بسازید و تنظیمات سرویس `OpenAI-compatible` خود را وارد کنید:
+The `/history` page displays previously generated results saved in the browser via `localStorage`.
 
-   ```dotenv
-   AVALAI_BASE_URL=https://your-provider.example/v1
-   AVALAI_API_KEY=your-api-key
-   DEFAULT_MODEL=openai/gpt-4o-mini
-   ```
+Notes:
 
-   `DEFAULT_MODEL` اختیاری است؛ در صورت تنظیم، به‌عنوان مدل پیش‌فرض انتخاب می‌شود. `AVALAI_BASE_URL` و `AVALAI_API_KEY` برای اتصال سرور به provider لازم هستند. کلید را در متغیر محیطی سرور نگه دارید و آن را در مخزن commit نکنید.
+- this is a client-side history, not a server-backed database
+- it is useful for quick prompt iteration and manual comparison
+- items can be reviewed and cleared from the UI
 
-3. سرور توسعه را اجرا کنید:
+### 3) Data Extractor
 
-   ```bash
-   pnpm dev
-   ```
+The `/extract-data` page provides structured extraction workflows for:
 
-4. در مرورگر به [http://localhost:3000](http://localhost:3000) بروید، برای هر پنل یک مدل و پارامتر انتخاب کنید و prompt را اجرا کنید. صفحه‌ی تاریخچه در مسیر `/history` قرار دارد.
+- support emails
+- resumes
+- invoices
 
-برای بررسی نسخه‌ی production:
+It accepts either:
+
+- plain-text email content, or
+- uploaded files such as PDFs, images, and documents
+
+The app sends the content to the OpenAI Responses API with JSON schema enforcement and validates the returned output with Zod before displaying it.
+
+## Tech stack
+
+- Next.js App Router
+- React + TypeScript
+- Tailwind CSS
+- OpenAI SDK
+- Zod validation
+- localStorage-based history
+
+## Project structure
+
+- `app/` — routes and API handlers
+  - `app/page.tsx` — main playground page
+  - `app/history/page.tsx` — history UI
+  - `app/extract-data/page.tsx` — extraction UI
+  - `app/api/generate/route.ts` — generate endpoint
+  - `app/api/extract/route.ts` — extraction endpoint
+- `components/` — UI and feature-specific components
+- `lib/` — API integrations, validation, prompts, and defaults
+- `prompts/` — extraction prompt configs and instruction templates
+- `types/` — shared TypeScript definitions
+- `tmp/` — local scratch/test data ignored by git unless needed
+
+## Environment variables
+
+Create a `.env.local` file at the project root:
+
+```dotenv
+AVALAI_BASE_URL=https://your-provider.example/v1
+AVALAI_API_KEY=your-api-key
+DEFAULT_MODEL=openai/gpt-4o-mini
+
+# Optional extraction-version overrides
+EMAIL_CONFIG_VERSION=1
+RESUME_CONFIG_VERSION=1
+INVOICE_CONFIG_VERSION=1
+```
+
+Required values:
+
+- `AVALAI_BASE_URL` — base URL for your OpenAI-compatible provider
+- `AVALAI_API_KEY` — API key used by the server
+- `DEFAULT_MODEL` — default model for generation and extraction requests
+
+Important:
+
+- keep API keys in server environment variables and do not commit them to the repository
+- the app reads provider configuration on the server side
+
+## Running the project
+
+Prerequisites:
+
+- Node.js
+- pnpm
+
+Install dependencies:
+
+```bash
+pnpm install
+```
+
+Start the development server:
+
+```bash
+pnpm dev
+```
+
+Open the app in your browser:
+
+- http://localhost:3000
+
+Routes:
+
+- `/` — model comparison playground
+- `/history` — saved generation history
+- `/extract-data` — structured data extraction tools
+
+Production build:
 
 ```bash
 pnpm build
 pnpm start
 ```
 
-## An example temperature experiment
+## Example workflow
 
-1. در پنل اول و دوم، یک `Model` یکسان انتخاب کنید و سایر پارامترها را تا جای ممکن یکسان نگه دارید.
-2. برای هر دو پنل از prompt یکسان استفاده می‌شود. برای نمونه:
+1. Open the main playground and choose models and settings for both panels.
+2. Use the same prompt for each side to make the comparison fair.
+3. Change one variable at a time, such as `temperature`, to study its effect on responses.
+4. Compare response quality, latency, token usage, and any returned cost information.
+5. Use the Data Extractor to convert raw email, CV, or invoice content into structured JSON output.
 
-   > Write a four-line story about a lighthouse during a storm.
+## Notes
 
-3. در پنل اول مقدار `Temperature` را روی `0.2` و در پنل دوم روی `1.2` بگذارید.
-4. روی **Generate** بزنید و دو پاسخ را کنار هم بخوانید. مقایسه کنید که کدام خروجی متمرکزتر یا متنوع‌تر به نظر می‌رسد؛ همچنین `Latency` و تعداد tokenها را مشاهده کنید.
-5. اگر می‌خواهید آزمایش را تکرار کنید، prompt و تنظیمات را ثابت نگه دارید و فقط `Temperature` را تغییر دهید. به‌علت تغییرپذیری طبیعی مدل‌ها، چند بار اجرا کنید و از یک پاسخ منفرد نتیجه‌گیری قطعی نکنید.
+- generation and extraction requests are validated with Zod schemas before being accepted
+- extraction outputs are constrained to JSON schema-based structures to improve reliability
+- browser history is intentionally local-only and is not persisted in a backend database
