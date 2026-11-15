@@ -192,7 +192,9 @@ function parseAndValidateExtraction(
       error,
     });
 
-    throw new Error("AI returned invalid JSON.");
+    throw new Error("AI returned invalid JSON.", {
+      cause: error,
+    });
   }
 
   const result = getValidationSchema(requestType).safeParse(data);
@@ -203,7 +205,7 @@ function parseAndValidateExtraction(
       issues: result.error.issues,
     });
 
-    throw new Error(`AI returned an invalid ${requestType} extraction result.`);
+    throw result.error;
   }
 
   return result.data;
@@ -222,10 +224,11 @@ export async function requestExtraction(
   const extractionSchema = getExtractionSchema(request.requestType);
 
   let input = await buildExtractionInput(request, prompt);
-  let attempts = 0;
   const maxRetries = options.maxRetries ?? 3;
   const baseDelayMs = options.baseDelayMs ?? 1000;
+  let previousOutput = "";
 
+  let attempts = 0;
   while (attempts <= maxRetries) {
     try {
       attempts++;
@@ -236,27 +239,31 @@ export async function requestExtraction(
         input,
         extractionSchema,
       });
+      previousOutput = response.output_text;
 
       return parseAndValidateExtraction(response.output_text, request.requestType);
     } catch (error) {
       console.error(`Extraction attempt ${attempts} failed:`, error);
 
-      // اگر سقف تعداد تلاش‌ها به پایان رسیده باشد، خطا را پرتاب می‌کنیم
       if (attempts > maxRetries) {
-        throw new Error(
-          `Failed to extract data after ${maxRetries} retries. Last error: ${String(error)}`,
-        );
+        throw new Error(`Failed to extract data after ${maxRetries} retries.`, { cause: error });
       }
 
-      // سناریو اول: خطای ساختاری Zod (مدل خروجی نامعتبر داده است)
       if (error instanceof ZodError) {
         const errorDetails = JSON.stringify(error.format(), null, 2);
 
-        // به‌روزرسانی آرایه input برای اضافه کردن متن خطا به عنوان سیستم پرامپت اصلاحی
         input = [
           {
             role: "system",
-            content: `Your previous output failed Zod validation. Review the error details below, fix the data structure, and ensure strict schema compliance.        
+            content: `Your previous output failed Zod validation.
+
+Review the previous output and the validation errors below.
+Return a corrected JSON object that strictly follows the schema.
+
+---
+Previous output:
+${previousOutput}
+
 ---
 Zod Error Details:
 ${errorDetails}
@@ -268,8 +275,7 @@ ${errorDetails}
         // بدون تاخیر زمانی مجدداً درخواست را می‌فرستیم چون مشکل از ساختار است نه شبکه
         continue;
       }
-
-      // سناریو دوم: خطاهای شبکه، Rate Limit یا خطای سمت سرویس‌دهنده
+      // Everything else = service/network/unexpected error
       else {
         // محاسبه Exponential Backoff: مثلاً 1000ms، سپس 2000ms، سپس 4000ms
         const backoffTime = baseDelayMs * Math.pow(2, attempts - 1);
@@ -278,6 +284,7 @@ ${errorDetails}
         );
 
         await delay(backoffTime);
+        continue;
       }
     }
   }

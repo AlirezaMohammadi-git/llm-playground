@@ -64,20 +64,6 @@ export async function POST(request: Request) {
           email: rawEmail,
         });
 
-        // 20 sample extraction
-        console.log(
-          `
-### Output of AI:
-
----
-
-${JSON.stringify(extractionResult)}
-
----
-
-`,
-        );
-
         return NextResponse.json({
           success: true,
           result: extractionResult,
@@ -106,20 +92,6 @@ ${JSON.stringify(extractionResult)}
         requestType: requestTypeResult.data,
         file,
       });
-
-      // 20 sample extraction
-      console.log(
-        `
-### Output of AI:
-
----
-
-${JSON.stringify(extractionResult)}
-
----
-
-`,
-      );
 
       return NextResponse.json({
         success: true,
