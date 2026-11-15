@@ -1,5 +1,8 @@
 export { cn } from "cn";
 
+// تابع کمکی برای ایجاد تاخیر زمانی (Delay)
+export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const models = [
   { label: "choose a model", value: null },
   { label: "gpt-6-luna", value: "openai/gpt-6-luna" },

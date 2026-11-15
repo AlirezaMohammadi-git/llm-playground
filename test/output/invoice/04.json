@@ -1,0 +1,13 @@
+{
+  "invoice_number": "05",
+  "date": "2026-03-18",
+  "billed_to": "",
+  "items": [
+    { "description": "اولترابوک پرو ۱۵ اینچ، i7/16GB/512GB", "amount": 129.99 },
+    { "description": "طرح محافظت در برابر حوادث ۳ ساله", "amount": 19.99 },
+    { "description": "ماوس بی‌سیم BT-500", "amount": 3.99 },
+    { "description": "کیف لپ‌تاپ ۱۵ اینچ، زغالی", "amount": 4.99 },
+    { "description": "هاب USB-C هفت‌پورتی", "amount": 4.99 }
+  ],
+  "total_due": 177.29
+}

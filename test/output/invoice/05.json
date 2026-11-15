@@ -1,0 +1,12 @@
+{
+  "invoice_number": "1009-01",
+  "date": "2022-04-01",
+  "billed_to": "بیلی دوپونت",
+  "items": [
+    { "description": "خدمات مشاوره دیجیتال", "amount": 100 },
+    { "description": "خدمات مدیریت برنامه‌ها", "amount": 470 },
+    { "description": "خدمات کسب‌وکار ابری", "amount": 300 },
+    { "description": "تحلیلگر کسب‌وکار", "amount": 170 }
+  ],
+  "total_due": 897
+}

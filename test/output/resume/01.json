@@ -1,0 +1,81 @@
+{
+  "personal_info": {
+    "name": "Jake Ryan",
+    "title": null,
+    "location": "Georgetown, TX",
+    "email": "jake@su.edu",
+    "phone": "123-456-7890",
+    "summary": null
+  },
+  "experience": [
+    {
+      "role": "Undergraduate Research Assistant",
+      "company": "Texas A&M University",
+      "period": "June 2020 - Present",
+      "highlights": [
+        "Developed a REST API using FastAPI and PostgreSQL to store data from learning management systems",
+        "Developed a full-stack web application using Flask, React, PostgreSQL and Docker to analyze GitHub data",
+        "Explored ways to visualize GitHub collaboration in a classroom setting"
+      ]
+    },
+    {
+      "role": "Information Technology Support Specialist",
+      "company": "Southwestern University",
+      "period": "Sep. 2018 - Present",
+      "highlights": [
+        "Communicate with managers to set up campus computers used on campus",
+        "Assess and troubleshoot computer problems brought by students, faculty and staff",
+        "Maintain upkeep of computers, classroom equipment, and 200 printers across campus"
+      ]
+    },
+    {
+      "role": "Artificial Intelligence Research Assistant",
+      "company": "processing-instruction-not-found",
+      "period": "May 2019 - July 2019",
+      "highlights": [
+        "Explored methods to generate video game dungeons based off of The Legend of Zelda",
+        "Developed a game in Java to test the generated dungeons",
+        "Contributed             50K+ lines of code to an established codebase via Git",
+        "Conducted a human subject study to determine which video game dungeon generation technique is enjoyable",
+        "Wrote an 8-page paper and gave multiple presentations on-campus",
+        "Presented virtually to the的に Japanese. I'in't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't't-not-found"
+      ]
+    }
+  ],
+  "education": {
+    "institution": "Southwestern University",
+    "degree": "Bachelor of Arts",
+    "field_of_study": "Computer Science, Minor in Business",
+    "graduation_year": "May 2021"
+  },
+  "skills": [
+    "Java",
+    "Python",
+    "C/C++",
+    "SQL (Postgres)",
+    "JavaScript",
+    "HTML/CSS",
+    "R",
+    "React",
+    "Node.js",
+    "Flask",
+    "JUnit",
+    "WordPress",
+    "Material-UI",
+    "FastAPI",
+    "Git",
+    "Docker",
+    "TravisCI",
+    "Google Cloud Platform",
+    "VS Code",
+    "Visual Studio",
+    "PyCharm",
+    "IntelliJ",
+    "Eclipse",
+    "pandas",
+    "NumPy",
+    "Matplotlib"
+  ],
+  "certifications": [],
+  "languages": []
+}

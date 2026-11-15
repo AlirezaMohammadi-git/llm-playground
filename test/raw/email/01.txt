@@ -1,0 +1,7 @@
+hey,
+so since you guys pushed that update yesterday morning, my analytics tab is completely broken.
+every time i hit export to csv, the whole page just locks up for like 10 seconds and then chrome throws an "out of memory" error and dies.
+i thought it was just my laptop acting up so i cleared my cache, killed all my extensions, and even installed firefox to test it.
+same exact thing happens there too, and on my work machine as well.
+i have a massive presentation with my team tomorrow morning and i literally cannot get the numbers out of the system.
+is there a hotfix coming today or some backend link you can send me to grab the file manually?

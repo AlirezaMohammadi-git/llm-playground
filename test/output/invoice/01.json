@@ -1,0 +1,13 @@
+{
+  "invoice_number": "10",
+  "date": "2024-02-19",
+  "billed_to": "آقای حمیدی",
+  "items": [
+    { "description": "نمونه محصول 1", "amount": 112500000 },
+    { "description": "نمونه محصول 2", "amount": 25500000 },
+    { "description": "نمونه محصول 3", "amount": 216500000 },
+    { "description": "نمونه محصول 4", "amount": 850000 },
+    { "description": "نمونه محصول 5", "amount": 600000 }
+  ],
+  "total_due": 338950000
+}

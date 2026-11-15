@@ -53,7 +53,14 @@ export default function MainExtractionPage() {
 export const fetchExtraction = async (
   rawData: RequestExtractionInput,
 ): Promise<ExtractionApiResponse> => {
+  // Fix: Email input isn't working
+
   const formData = new FormData();
+  if (rawData.requestType === "EMAIL") {
+    if (!rawData.email) throw new Error("Raw Email can't be empty.");
+
+    formData.append("email", rawData.email);
+  }
 
   formData.append("requestType", rawData.requestType);
 

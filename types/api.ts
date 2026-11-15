@@ -1,5 +1,6 @@
 export type RequestInput = {
   model: string;
+  fileModel: string;
   baseUrl: string;
   apiKey: string;
   prompt: string;

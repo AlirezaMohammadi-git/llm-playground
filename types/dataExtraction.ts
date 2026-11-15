@@ -27,3 +27,8 @@ export type ExtractionSchema = {
   name: string;
   schema: Record<string, unknown>;
 };
+
+export interface RetryOptions {
+  maxRetries?: number;
+  baseDelayMs?: number;
+}

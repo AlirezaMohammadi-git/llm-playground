@@ -28,8 +28,9 @@ export function loadDefaultRequest(
   const baseUrl = process.env.AVALAI_BASE_URL;
   const apiKey = process.env.AVALAI_API_KEY;
   const model = process.env.DEFAULT_MODEL;
+  const fileModel = process.env.DEFAULT_FILE_MODEL;
 
-  if (!baseUrl || !apiKey || !model) {
+  if (!baseUrl || !apiKey || !model || !fileModel) {
     throw new Error("Missing required environment variables for API configuration.");
   }
 
@@ -38,6 +39,7 @@ export function loadDefaultRequest(
     baseUrl,
     apiKey,
     prompt: defaultPrompt,
+    fileModel: fileModel,
     temperature: defaultTemp,
     maxTokens: defaultMaxTokens,
   };

@@ -1,0 +1,15 @@
+{
+  "invoice_number": "01234578910",
+  "date": "2025-07-05",
+  "billed_to": "",
+  "items": [
+    { "description": "شرح محصول", "amount": 50 },
+    { "description": "شرح محصول", "amount": 50 },
+    { "description": "شرح محصول", "amount": 50 },
+    { "description": "شرح محصول", "amount": 50 },
+    { "description": "شرح محصول", "amount": 50 },
+    { "description": "شرح محصول", "amount": 50 },
+    { "description": "شرح محصول", "amount": 50 }
+  ],
+  "total_due": 375
+}

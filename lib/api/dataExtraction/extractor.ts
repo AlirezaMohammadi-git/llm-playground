@@ -5,13 +5,22 @@ import "server-only";
 import { getClient } from "@/lib/OpenAI/client";
 import { getExtractionInstruction } from "@/lib/prompts/instructions";
 import {
+  Invoice,
   InvoiceSchema,
+  Resume,
   ResumeSchema,
+  SupportEmail,
   SupportEmailSchema,
 } from "@/lib/validation/extractData/dataExtractionValidator";
-import type { ExtractionSchema, RequestExtractionInput } from "@/types/dataExtraction";
+import type {
+  ExtractionSchema,
+  RequestExtractionInput,
+  RetryOptions,
+} from "@/types/dataExtraction";
 import { loadDefaultRequest } from "../LoadDefaults";
 import type { ResponseInputItem } from "openai/resources/responses/responses";
+import { ZodError } from "zod";
+import { delay } from "@/lib/utils";
 
 async function fileToDataUrl(file: File): Promise<string> {
   const bytes = await file.arrayBuffer();
@@ -204,23 +213,74 @@ function parseAndValidateExtraction(
  * Extract structured data from email/document input
  * using OpenAI Responses API + Structured Outputs + Zod.
  ****************************************************/
-export async function requestExtraction(request: RequestExtractionInput) {
+export async function requestExtraction(
+  request: RequestExtractionInput,
+  options: RetryOptions = { maxRetries: 3, baseDelayMs: 1000 },
+): Promise<SupportEmail | Resume | Invoice> {
   const { instructions, prompt } = await getExtractionInstruction(request.requestType);
-
   const defaultReq = loadDefaultRequest();
   const extractionSchema = getExtractionSchema(request.requestType);
 
-  const input = await buildExtractionInput(request, prompt);
+  let input = await buildExtractionInput(request, prompt);
+  let attempts = 0;
+  const maxRetries = options.maxRetries ?? 3;
+  const baseDelayMs = options.baseDelayMs ?? 1000;
 
-  const response = await createExtractionResponse({
-    model:
-      request.requestType === "INVOICE" || request.requestType === "RESUME"
-        ? defaultReq.model
-        : defaultReq.model,
-    instructions,
-    input,
-    extractionSchema,
-  });
+  while (attempts <= maxRetries) {
+    try {
+      attempts++;
 
-  return parseAndValidateExtraction(response.output_text, request.requestType);
+      const response = await createExtractionResponse({
+        model: request.requestType === "EMAIL" ? defaultReq.model : defaultReq.fileModel,
+        instructions,
+        input,
+        extractionSchema,
+      });
+
+      return parseAndValidateExtraction(response.output_text, request.requestType);
+    } catch (error) {
+      console.error(`Extraction attempt ${attempts} failed:`, error);
+
+      // اگر سقف تعداد تلاش‌ها به پایان رسیده باشد، خطا را پرتاب می‌کنیم
+      if (attempts > maxRetries) {
+        throw new Error(
+          `Failed to extract data after ${maxRetries} retries. Last error: ${String(error)}`,
+        );
+      }
+
+      // سناریو اول: خطای ساختاری Zod (مدل خروجی نامعتبر داده است)
+      if (error instanceof ZodError) {
+        const errorDetails = JSON.stringify(error.format(), null, 2);
+
+        // به‌روزرسانی آرایه input برای اضافه کردن متن خطا به عنوان سیستم پرامپت اصلاحی
+        input = [
+          {
+            role: "system",
+            content: `Your previous output failed Zod validation. Review the error details below, fix the data structure, and ensure strict schema compliance.        
+---
+Zod Error Details:
+${errorDetails}
+---`,
+          },
+          ...input,
+        ];
+
+        // بدون تاخیر زمانی مجدداً درخواست را می‌فرستیم چون مشکل از ساختار است نه شبکه
+        continue;
+      }
+
+      // سناریو دوم: خطاهای شبکه، Rate Limit یا خطای سمت سرویس‌دهنده
+      else {
+        // محاسبه Exponential Backoff: مثلاً 1000ms، سپس 2000ms، سپس 4000ms
+        const backoffTime = baseDelayMs * Math.pow(2, attempts - 1);
+        console.warn(
+          `Network or Rate Limit error detected. Retrying in ${backoffTime}ms (Attempt ${attempts}/${maxRetries})...`,
+        );
+
+        await delay(backoffTime);
+      }
+    }
+  }
+
+  throw new Error("Unexpected end of extraction retry loop.");
 }

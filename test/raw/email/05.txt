@@ -1,0 +1,12 @@
+Hey dev team,
+
+Quick question regarding your REST API behavior under load. We're mid-way through wiring your webhooks into our internal CRM, and we're seeing two strange bottlenecks:
+
+1. During peak afternoon hours, webhook payloads are showing up in our queue 10–15 minutes late.
+
+2. We're catching sporadic HTTP 429 responses even though our rate-limiter caps outbound calls strictly at 50 req/min (well under your documented 60/min limit).
+
+Do you enforce an undocumented per-second burst cap on the Standard plan? If so, could you point us to the exact X-RateLimit headers we should be parsing? We're open to jumping up to Enterprise if dedicated throughput solves the webhook lag, just want to understand the root cause before we commit.
+
+Cheers,
+Tariq

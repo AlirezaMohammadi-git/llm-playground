@@ -1,0 +1,8 @@
+{
+  "ticket_type": "پشتیبانی فنی API",
+  "order_number": null,
+  "customer_name": "طارق",
+  "purchase_timeframe": null,
+  "issue": "تأخیر ۱۰ تا ۱۵ دقیقه‌ای در دریافت داده‌های وب‌هوک در ساعات اوج مصرف و دریافت خطاهای HTTP 429 با وجود قرار داشتن زیر حد مجاز نرخ درخواست‌ها.",
+  "requested_resolution": "دریافت اطلاعات در مورد محدودیت‌های انفجاری (burst cap) و هدرهای X-RateLimit، و بررسی امکان ارتقا به طرح Enterprise برای حل مشکل تأخیر."
+}

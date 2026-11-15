@@ -41,6 +41,7 @@ export async function POST(request: Request) {
 
       const rawRequestType = formData.get("requestType");
       const file = formData.get("file");
+      const rawEmail = formData.get("email");
 
       const requestTypeResult = DataTypeSchema.safeParse(rawRequestType);
 
@@ -51,6 +52,36 @@ export async function POST(request: Request) {
           },
           { status: 400 },
         );
+      }
+
+      if (requestTypeResult.data === "EMAIL") {
+        if (typeof rawEmail !== "string" || rawEmail.trim() === "") {
+          throw new Error("Raw email can't be empty.");
+        }
+
+        const extractionResult = await requestExtraction({
+          requestType: requestTypeResult.data,
+          email: rawEmail,
+        });
+
+        // 20 sample extraction
+        console.log(
+          `
+### Output of AI:
+
+---
+
+${JSON.stringify(extractionResult)}
+
+---
+
+`,
+        );
+
+        return NextResponse.json({
+          success: true,
+          result: extractionResult,
+        });
       }
 
       if (!(file instanceof File)) {
@@ -75,6 +106,20 @@ export async function POST(request: Request) {
         requestType: requestTypeResult.data,
         file,
       });
+
+      // 20 sample extraction
+      console.log(
+        `
+### Output of AI:
+
+---
+
+${JSON.stringify(extractionResult)}
+
+---
+
+`,
+      );
 
       return NextResponse.json({
         success: true,

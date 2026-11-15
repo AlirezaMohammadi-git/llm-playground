@@ -1,0 +1,79 @@
+{
+  "personal_info": {
+    "name": null,
+    "title": "توسعه‌دهنده وب",
+    "location": "روچستر، نیویورک",
+    "email": "cs.student@rochester.edu",
+    "phone": "585-555-1234",
+    "summary": null
+  },
+  "experience": [
+    {
+      "role": "دستیار پژوهشی، آزمایشگاه تعامل انسان و رایانه",
+      "company": "University of Rochester",
+      "period": "ژانویه 20XX – تاکنون",
+      "highlights": [
+        "با همکاری تیمی از متخصصان پنج دانشگاه، در توسعه VizWiz مشارکت کرد؛ برنامه‌ای برنده جایزه برای آیفون که با استفاده هوشمندانه از Mechanical Turk پاسخ‌هایی تقریباً بلادرنگ به پرسش‌های تصویری ارائه می‌دهد. به‌طور مستقل با Objective-C و کتابخانه OpenCV در توسعه برنامه مشارکت کرد.",
+        "برنامه آیفون EasySnap را توسعه داد که با بهره‌گیری از فناوری بینایی رایانه‌ای و بازخورد صوتی به افراد نابینا در عکاسی کمک می‌کند؛ این پروژه در مجموعه مقالات کنفرانس UIST 20XX منتشر شد.",
+        "برنامه‌ای برای آیفون توسعه داد که متن موجود در عکس‌ها را تشخیص می‌دهد و برای کاربر می‌خواند؛ با استفاده از Objective-C، کتابخانه Tesseract و کتابخانه OpenCV.",
+        "طراحی، ساخت و آزمایش برنامه تشخیص اسکناس آمریکایی برای آیفون با استفاده از IQ Engine را در دست انجام دارد.",
+        "برای مقاله «VizWiz: Nearly Real-time Answers to Visual Questions» جایزه بهترین مقاله را در همایش ACM Symposium on User Interface Software and Technology (UIST 20XX) دریافت کرد."
+      ]
+    },
+    {
+      "role": "توسعه‌دهنده پروژه MediaCalendar",
+      "company": "University of Rochester",
+      "period": "آوریل 20XX",
+      "highlights": [
+        "در تیمی سه‌نفره، افزونه‌ای برای Chrome توسعه داد تا ویدئوهای YouTube و برنامه‌های تلویزیونی را در نمای تقویمی یکپارچه به اشتراک بگذارد و زمان‌بندی کند.",
+        "پروژه را در تمام مراحل توسعه هدایت کرد؛ از تحلیل کاربران و وظایف و ساخت نمونه اولیه کم‌جزئیات تا آزمون کاربردپذیری، ساخت نمونه اولیه تعاملی و آزمون نهایی کاربردپذیری.",
+        "با JavaScript (jQuery)، DOM، HTML و CSS توسعه داده شد."
+      ]
+    },
+    {
+      "role": "توسعه‌دهنده پروژه خزنده وب",
+      "company": "University of Rochester",
+      "period": "اکتبر–نوامبر 20XX",
+      "highlights": [
+        "برنامه خزنده وبی نوشت که پیوسته نشانی‌های اینترنتی را از صفحات وب استخراج می‌کرد و صفحات وب یا انواع پیوندهای مشخص‌شده توسط کاربر را دانلود می‌کرد؛ عمدتاً با برنامه‌نویسی سوکت در C."
+      ]
+    },
+    {
+      "role": "توسعه‌دهنده و طراح وب آزادکار",
+      "company": "Minnie Web Design",
+      "period": "ژوئن 20XX – تاکنون",
+      "highlights": [
+        "وب‌سایت‌هایی با HTML/CSS/PHP ساخت، بنر Flash طراحی کرد و با Photoshop تصاویر پس‌زمینه ایجاد کرد."
+      ]
+    }
+  ],
+  "education": {
+    "institution": "University of Rochester",
+    "degree": "کارشناسی علوم",
+    "field_of_study": "علوم کامپیوتر",
+    "graduation_year": "انتظار می‌رود مه 20XX"
+  },
+  "skills": [
+    "C/C++",
+    "Java",
+    "Python",
+    "Ruby",
+    "Objective-C",
+    "HTML/CSS/JavaScript/AJAX",
+    "PHP/MySQL",
+    "XML/JSON",
+    "طراحی رابط کاربری",
+    "تجربه کاربری",
+    "چرخه توسعه نرم‌افزار",
+    "OpenCV",
+    "Tesseract",
+    "IQ Engine",
+    "jQuery",
+    "DOM",
+    "برنامه‌نویسی سوکت",
+    "Photoshop",
+    "Flash"
+  ],
+  "certifications": [],
+  "languages": []
+}

@@ -1,0 +1,58 @@
+{
+  "personal_info": {
+    "name": "Hans Benny Bear",
+    "title": "توسعه‌دهنده فرانت‌اند",
+    "location": "تالین، استونی",
+    "email": "hello@kickresume.com",
+    "phone": "999 999 999",
+    "summary": "فردی مشتاق و پرتلاش در حوزه فناوری اطلاعات، با علاقه‌ای عمیق به برنامه‌نویسی وب، توسعه اپلیکیشن و طراحی وب‌سایت. اخیراً مهارت‌های خود را به‌عنوان توسعه‌دهنده فرانت‌اند در یک شرکت نوپا تقویت کرده و تجربه عملی ارزشمندی به دست آورده‌ام. مشتاق گسترش دانش و تخصصم هستم و فعالانه به‌دنبال موقعیتی در شرکتی نوآور در صنعت فناوری اطلاعات می‌گردم. متعهد و خوش‌برخورد هستم و آماده‌ام در محیطی تیمی و پویا مشارکت کنم. در حال حاضر به‌دنبال فرصت شغلی یا کارآموزی به‌عنوان توسعه‌دهنده فرانت‌اند هستم."
+  },
+  "experience": [
+    {
+      "role": "توسعه‌دهنده فرانت‌اند",
+      "company": "BudgetMatador",
+      "period": "2015/03 - Present",
+      "highlights": [
+        "با استفاده از JavaScript (از جمله Backbone و jQuery)، Underscore، HTML و CSS برای اهداف آموزشیِ خودآموز، به استارتاپی که هنوز بودجه‌ای دریافت نکرده بود کمک کردم تا محصول خود را توسعه دهد.",
+        "در توسعه وب‌سایت www.budgetmatador.com مشارکت داشتم."
+      ]
+    },
+    {
+      "role": "مشاور خدمات مشتریان",
+      "company": "Arvutitark OÜ",
+      "period": "2014/03 - 2015/04",
+      "highlights": [
+        "به‌عنوان فروشنده در یک فروشگاه خرده‌فروشی محصولات فناوری اطلاعات، مهارت‌های فروش استثنایی نشان دادم."
+      ]
+    },
+    {
+      "role": "دستیار برگزارکننده",
+      "company": "Estonian Athletic Association",
+      "period": "2008/06 - 2012/08",
+      "highlights": ["در سازمان‌دهی چندین رویداد دوومیدانی و میدانی کمک کردم."]
+    }
+  ],
+  "education": {
+    "institution": "Estonian Entrepreneurship University of Applied Sciences",
+    "degree": null,
+    "field_of_study": "طراحی وب و گرافیک دیجیتال",
+    "graduation_year": "Present"
+  },
+  "skills": [
+    "C#",
+    "C++",
+    "JavaScript",
+    "PHP",
+    "HTML",
+    "CSS",
+    "Visual Basic",
+    "3D Studio Max",
+    "Adobe After Effects",
+    "Adobe Illustrator",
+    "Adobe Photoshop",
+    "Adobe Premiere",
+    "CorelDRAW"
+  ],
+  "certifications": [],
+  "languages": ["انگلیسی — مسلط", "آلمانی — حرفه‌ای", "روسی — حرفه‌ای", "استونیایی — زبان مادری"]
+}
