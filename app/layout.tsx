@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
@@ -27,7 +28,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       suppressHydrationWarning
       className={cn(
-        "h-full",
+        "h-full no-scrollbar",
         "antialiased",
         geistSans.variable,
         geistMono.variable,
@@ -36,10 +37,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         "flex min-h-screen w-full flex-col p-6 sm:p-8",
       )}
     >
-      <head />
-      <body className="min-h-full flex flex-col">
+      <body>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          {children}
+          <TooltipProvider>{children}</TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

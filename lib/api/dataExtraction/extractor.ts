@@ -20,7 +20,7 @@ import type {
 import { loadDefaultRequest } from "../LoadDefaults";
 import type { ResponseInputItem } from "openai/resources/responses/responses";
 import { ZodError } from "zod";
-import { delay } from "@/lib/utils";
+import { delay } from "@/lib/my_utils";
 
 async function fileToDataUrl(file: File): Promise<string> {
   const bytes = await file.arrayBuffer();

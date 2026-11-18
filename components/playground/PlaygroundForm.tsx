@@ -6,7 +6,9 @@ import Controls from "./Controls";
 import ResponseSection from "./ResponsesSection";
 import PromptSection from "./PromptSection";
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "../ui/item";
-import { CircleAlert } from "lucide-react";
+import { ArrowLeft, CircleAlert } from "lucide-react";
+import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
 
 // ############ Context to manage UI events and state ##########################################
 const UIEventsContext = createContext<{
@@ -83,9 +85,20 @@ export function reducer(state: State, action: Action): State {
   }
 }
 export default function Playground({ defaultState }: { defaultState: State }) {
+  const router = useRouter();
   return (
     <UIEventsProvider defaultState={defaultState}>
-      <PlaygroundForm />
+      <div>
+        <div className="mb-6">
+          <Button variant="outline" className="mb-4" onClick={() => router.back()}>
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back
+          </Button>
+          <h1 className="text-2xl font-bold">Playground</h1>
+        </div>
+
+        <PlaygroundForm />
+      </div>
     </UIEventsProvider>
   );
 }
@@ -93,7 +106,7 @@ export default function Playground({ defaultState }: { defaultState: State }) {
 function PlaygroundForm() {
   const { firstState, secondState, error, firstDispatch, secondDispatch } = useUIEvents();
   return (
-    <div className="flex flex-col items-start justify-start gap-4 mt-8 w-full">
+    <div className="flex flex-col items-center justify-between gap-4 mt-8 w-full">
       <div className="flex flex items-start justify-start gap-4 mt-4 w-full">
         <Controls state={firstState} dispatch={firstDispatch} />
         <Controls state={secondState} dispatch={secondDispatch} />

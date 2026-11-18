@@ -1,10 +1,14 @@
 import { State } from "@/types";
-import { RequestInput } from "@/types/api";
 import { getClient } from "../OpenAI/client";
 import getGenerateInstructions from "../prompts/instructions";
-import { ApiResponse, ApiResponseSchema, ResponseResult } from "../validation/requestValidator";
+import {
+  ApiResponse,
+  ApiResponseSchema,
+  GenerateInput,
+  ResponseResult,
+} from "../validation/requestValidator";
 
-export async function generate(input: RequestInput) {
+export async function generate(input: GenerateInput) {
   const client = await getClient();
   const instructions = await getGenerateInstructions();
   const context = [
