@@ -6,7 +6,7 @@ import { State, Action } from "@/types";
 import { createApiRequests } from "@/lib/api/history/apiHistoryStorage";
 import { useUIEvents } from "./PlaygroundForm";
 import Loader from "../ui/loader";
-import { fetchGenerate } from "@/lib/api/Generate";
+import { fetchGenerate } from "@/actions/playground-generate/fetchGenerate";
 
 // ############ Prompt Section Component ##########################################
 export default function PromptSection({

@@ -2,7 +2,7 @@ import z from "zod";
 import {
   DataTypeSchema,
   RequestExtractionInputSchema,
-} from "@/lib/validation/extractData/dataExtractionValidator";
+} from "@/lib/validation/extractData/ExtractZodTypes";
 
 export type DataType = z.infer<typeof DataTypeSchema>;
 

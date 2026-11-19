@@ -1,4 +1,4 @@
-import { ResponseResult } from "@/lib/validation/requestValidator";
+import { ResponseResult } from "@/lib/validation/generate/GenerateZodTypes";
 
 export type State = {
   model: string | null;
@@ -26,3 +26,9 @@ export type Action =
   | { type: "SET_TOP_K"; payload: number | null }
   | { type: "SET_PROMPT"; payload: string | null }
   | { type: "SET_RESPONSE"; payload: ResponseResult | null };
+
+export type InputContentType = Array<
+  | { type: "input_image"; image_url: string; detail: "high" | "low" | "auto" }
+  | { type: "input_file"; filename: string; file_data: string }
+  | { type: "input_text"; text: string }
+>;

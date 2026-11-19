@@ -2,13 +2,10 @@
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
-import {
-  SupportEmail,
-  SupportEmailSchema,
-} from "@/lib/validation/extractData/dataExtractionValidator";
+import { SupportEmail, SupportEmailSchema } from "@/lib/validation/extractData/ExtractZodTypes";
 import { Info, Loader2 } from "lucide-react";
 import { Item, ItemContent, ItemDescription, ItemTitle } from "../ui/item";
-import { fetchExtraction } from "./MainPage";
+import { fetchExtraction } from "@/actions/extract-data/fetchExtraction";
 
 async function handleEmailProcess(
   rawEmail: string,

@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Action, State } from "@/types";
-import { models } from "@/lib/my_utils";
+import { models } from "@/config/models";
 
 export default function Controls({
   state,

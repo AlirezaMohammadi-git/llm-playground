@@ -5,6 +5,7 @@ import promptConfig from "@/prompts/generate/index.json";
 import supportEmailConfig from "@/prompts/dataExtraction/supportEmail.json";
 import resumeConfig from "@/prompts/dataExtraction/resume.json";
 import invoiceConfig from "@/prompts/dataExtraction/invoice.json";
+import conversationConfig from "@/prompts/conversation/conversation.json";
 
 import type { DataType, ExtractionConfig, ExtractionConfigType } from "@/types/dataExtraction";
 
@@ -74,6 +75,27 @@ export async function getExtractionInstruction(
     throw new Error(
       `Extraction instructions for type '${type}' and version '${activeVersion}' are missing.`,
     );
+  }
+
+  return promptData;
+}
+
+export async function getConversationInstructions(
+  version: string = "1",
+): Promise<ExtractionConfig> {
+  const config = conversationConfig as ExtractionConfigType;
+  const promptData = config[version];
+
+  if (!promptData) {
+    throw new Error(`Extraction configuration for version '${version}' not found.`);
+  }
+
+  if (!promptData.prompt) {
+    throw new Error(`Extraction prompt for version '${version}' is missing.`);
+  }
+
+  if (!promptData.instructions) {
+    throw new Error(`Extraction instructions for version '${version}' are missing.`);
   }
 
   return promptData;

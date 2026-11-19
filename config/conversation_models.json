@@ -1,0 +1,6 @@
+[
+  { "label": "gpt-6-luna", "value": "openai/gpt-6-luna" },
+  { "label": "deepseek", "value": "deepseek-chat" },
+  { "label": "Gemma-4", "value": "gemma-4-26b-a4b-it" },
+  { "label": "cf.granite", "value": "cf.granite-4.0-h-micro" }
+]

@@ -5,7 +5,7 @@ import { requestExtraction } from "@/lib/api/dataExtraction/extractor";
 import {
   DataTypeSchema,
   RequestExtractionInputSchema,
-} from "@/lib/validation/extractData/dataExtractionValidator";
+} from "@/lib/validation/extractData/ExtractZodTypes";
 
 export async function POST(request: Request) {
   try {

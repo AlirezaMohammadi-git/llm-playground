@@ -11,7 +11,7 @@ import {
   ResumeSchema,
   SupportEmail,
   SupportEmailSchema,
-} from "@/lib/validation/extractData/dataExtractionValidator";
+} from "@/lib/validation/extractData/ExtractZodTypes";
 import type {
   ExtractionSchema,
   RequestExtractionInput,

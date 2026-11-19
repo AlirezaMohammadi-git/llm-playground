@@ -2,7 +2,7 @@ import "client-only";
 
 import { z } from "zod";
 
-import { ResponseResultSchema } from "@/lib/validation/requestValidator";
+import { ResponseResultSchema } from "@/lib/validation/generate/GenerateZodTypes";
 
 type ApiRequest = z.infer<typeof ResponseResultSchema>;
 

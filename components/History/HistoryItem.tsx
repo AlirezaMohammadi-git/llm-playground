@@ -1,6 +1,6 @@
 "use client";
 
-import { ResponseResultSchema } from "@/lib/validation/requestValidator";
+import { ResponseResultSchema } from "@/lib/validation/generate/GenerateZodTypes";
 import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 

@@ -2,7 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { generate } from "@/lib/api/Generate";
-import { GenerateSchema } from "@/lib/validation/requestValidator";
+import { GenerateSchema } from "@/lib/validation/generate/GenerateZodTypes";
 
 export async function POST(request: Request) {
   try {

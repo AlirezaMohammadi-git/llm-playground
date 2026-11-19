@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
-import { ResponseResultSchema } from "@/lib/validation/requestValidator";
+import { ResponseResultSchema } from "@/lib/validation/generate/GenerateZodTypes";
 
 type ApiRequestType = z.infer<typeof ResponseResultSchema>;
 

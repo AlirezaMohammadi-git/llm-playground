@@ -3,8 +3,8 @@
 import { useState, useRef } from "react";
 import { Button } from "../ui/button";
 import { Loader2, Upload, FileText, X, Info } from "lucide-react";
-import { Invoice, InvoiceSchema } from "@/lib/validation/extractData/dataExtractionValidator";
-import { fetchExtraction } from "./MainPage";
+import { Invoice, InvoiceSchema } from "@/lib/validation/extractData/ExtractZodTypes";
+import { fetchExtraction } from "@/actions/extract-data/fetchExtraction";
 
 async function handleProcess(
   setIsProcessing: (value: boolean) => void,
