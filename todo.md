@@ -18,7 +18,7 @@
 - [x] Create logic for actual ai request
 - [x] Set model in UI.
 - [x] Add laoding state for conversations.
-- [ ] Make upload file button working.
+- [x] Make upload file button working.
 - [ ] Add context into AI => Previous messages - Previous Files
 - [ ] Show remaining context, used context.
 - [ ] Read context engineering patterns repository and use it in outs

@@ -29,6 +29,7 @@ import requestGeneraton from "@/actions/conversation/fetchGenerate";
 import { RequestGenerationInput } from "@/lib/validation/conversation/ConversationZodTypes";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils"; // فرض بر وجود cn (clsx + tailwind-merge)
+import { Markdown } from "../markdown";
 
 type Chat = {
   id: string;
@@ -37,13 +38,97 @@ type Chat = {
   responseText: string;
 };
 
-function ChatItem({ chat }: { chat: Chat }) {
+function ChatItem({
+  chat,
+  files,
+  setFiles,
+}: {
+  chat: Chat;
+  files: File[];
+  setFiles: React.Dispatch<React.SetStateAction<File[]>>;
+}) {
+  const [componentError, setComponentError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const MAX_FILES = 5;
+
+  const handleRemoveFile = (index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+    setComponentError(null);
+
+    if (files.length === 1 && fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleClearAllFiles = () => {
+    setFiles([]);
+    setComponentError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   return (
     <div className="flex w-full flex-col gap-3 my-6">
-      <div className="ml-auto break-words rounded-2xl bg-muted px-4 py-3 text-sm text-foreground">
+      <div>
+        {/* نمایش لیست فایل‌های انتخاب‌شده */}
+        {files.length > 0 && chat.turn === 1 && (
+          <div className="mb-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                {files.length} / {MAX_FILES} فایل
+              </span>
+              <button
+                type="button"
+                onClick={handleClearAllFiles}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                حذف همه
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {files.map((file, index) => (
+                <div
+                  key={`${file.name}-${file.size}-${file.lastModified}-${index}`}
+                  className="flex items-center gap-2 rounded-lg border bg-muted/50 px-3 py-1.5 text-sm"
+                >
+                  <PaperclipIcon className="size-3.5 shrink-0 text-muted-foreground" />
+                  <span className="max-w-[180px] truncate" title={file.name}>
+                    {file.name}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveFile(index)}
+                    className="ml-1 rounded-full p-0.5 hover:bg-muted transition-colors"
+                    aria-label={`حذف ${file.name}`}
+                  >
+                    <span className="sr-only">حذف</span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className="size-3.5"
+                    >
+                      <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {componentError && <p className="mb-2 text-xs text-destructive">{componentError}</p>}
+      </div>
+      <div className="ml-auto break-words rounded-xl bg-muted px-4 py-3 text-sm text-foreground">
         {chat.userMessage}
       </div>
-      <div className="mr-auto break-words rounded-2xl px-4 py-3 text-sm">{chat.responseText}</div>
+      {/* <Markdown >{chat.responseText}<Markdown/> */}
+      <Markdown className="mr-auto break-words rounded-xl px-4 py-3 text-sm" rtl>
+        {chat.responseText}
+      </Markdown>
     </div>
   );
 }
@@ -58,6 +143,8 @@ function ChatInput({
   canSend,
   error,
   isLoading,
+  files,
+  setFiles,
 }: {
   formRef: RefObject<HTMLFormElement | null>;
   onSubmit: (event: React.SyntheticEvent<HTMLFormElement>) => void;
@@ -68,111 +155,237 @@ function ChatInput({
   canSend: boolean;
   error: string | null;
   isLoading: boolean;
+  files: File[];
+  setFiles: React.Dispatch<React.SetStateAction<File[]>>;
 }) {
-  return (
-    <div className="p-8 pt-0">
-      <form
-        ref={formRef}
-        onSubmit={onSubmit}
-        className="w-full bg-background/70 backdrop-blur-md border-t border-border/40"
-      >
-        <InputGroup>
-          <InputGroupTextarea
-            value={text}
-            onChange={(event) => setDraft(event.target.value)}
-            placeholder="Ask the agent..."
-            aria-label="Message"
-            className="min-h-14"
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault();
-                formRef.current?.requestSubmit();
-              }
-            }}
-          />
-          <InputGroupAddon align="block-end" className="pt-1">
-            <div className="flex flex-row gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  render={
-                    <InputGroupButton
-                      aria-label="Add context"
-                      type="button"
-                      size="icon-sm"
-                      variant="outline"
-                    >
-                      <PlusIcon />
-                    </InputGroupButton>
-                  }
-                />
-                <DropdownMenuContent align="start" side="top" className="w-44">
-                  <DropdownMenuItem>
-                    <PaperclipIcon />
-                    Add Photos & Files
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem disabled>
-                    <TelescopeIcon />
-                    Deep Research
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <GlobeIcon />
-                    Web Search
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+  const [componentError, setComponentError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-              <DropdownMenu>
-                <DropdownMenuTrigger render={<Button variant="outline">{model.label}</Button>} />
-                <DropdownMenuContent>
-                  {conversationModels.map((item) => (
-                    <DropdownMenuItem key={item.value ?? "null"} onClick={() => setModel(item)}>
-                      {item.label}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+  const MAX_FILES = 5;
+
+  const handleRemoveFile = (index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+    setComponentError(null);
+
+    if (files.length === 1 && fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleClearAllFiles = () => {
+    setFiles([]);
+    setComponentError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files ?? []);
+    if (selectedFiles.length === 0) return;
+
+    setFiles((prev) => {
+      const remainingSlots = MAX_FILES - prev.length;
+
+      if (remainingSlots <= 0) {
+        setComponentError(`حداکثر ${MAX_FILES} فایل مجاز است.`);
+        return prev;
+      }
+
+      const filesToAdd = selectedFiles.slice(0, remainingSlots);
+      const newFiles = [...prev, ...filesToAdd];
+
+      if (selectedFiles.length > remainingSlots) {
+        setComponentError(
+          `فقط ${remainingSlots} فایل اضافه شد. حداکثر ${MAX_FILES} فایل مجاز است.`,
+        );
+      } else {
+        setComponentError(null);
+      }
+
+      return newFiles;
+    });
+
+    e.target.value = "";
+  };
+
+  return (
+    <div className="relative p-8 pt-12">
+      {/* گرادیان نرم از پایین (background) به بالا (transparent) */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-background"
+        aria-hidden="true"
+      />
+
+      <div className="relative z-10">
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          className="hidden"
+          multiple
+        />
+
+        {/* نمایش لیست فایل‌های انتخاب‌شده */}
+        {files.length > 0 && (
+          <div className="mb-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                {files.length} / {MAX_FILES} فایل
+              </span>
+              <button
+                type="button"
+                onClick={handleClearAllFiles}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                حذف همه
+              </button>
             </div>
 
-            {/* دکمه ارسال با transition نرم */}
-            <InputGroupButton
-              type="submit"
-              variant="default"
-              size="icon-sm"
-              disabled={!canSend || isLoading}
-              aria-errormessage={error ?? undefined}
-              className="ml-auto relative"
-            >
-              <div className="relative size-4">
-                <ArrowUpIcon
-                  className={cn(
-                    "absolute inset-0 size-4 transition-all duration-200 ease-out",
-                    isLoading ? "scale-50 opacity-0 rotate-45" : "scale-100 opacity-100 rotate-0",
-                  )}
-                />
-                <LoaderCircleIcon
-                  className={cn(
-                    "absolute inset-0 size-4 animate-spin transition-all duration-200 ease-out",
-                    isLoading ? "scale-100 opacity-100" : "scale-50 opacity-0",
-                  )}
-                />
+            <div className="flex flex-wrap gap-2">
+              {files.map((file, index) => (
+                <div
+                  key={`${file.name}-${file.size}-${file.lastModified}-${index}`}
+                  className="flex items-center gap-2 rounded-lg border bg-muted/50 px-3 py-1.5 text-sm"
+                >
+                  <PaperclipIcon className="size-3.5 shrink-0 text-muted-foreground" />
+                  <span className="max-w-[180px] truncate" title={file.name}>
+                    {file.name}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveFile(index)}
+                    className="ml-1 rounded-full p-0.5 hover:bg-muted transition-colors"
+                    aria-label={`حذف ${file.name}`}
+                  >
+                    <span className="sr-only">حذف</span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className="size-3.5"
+                    >
+                      <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {componentError && <p className="mb-2 text-xs text-destructive">{componentError}</p>}
+
+        <form ref={formRef} onSubmit={onSubmit} className="w-full">
+          <InputGroup className="px-1 max-h-43">
+            <InputGroupTextarea
+              value={text}
+              onChange={(event) => setDraft(event.target.value)}
+              placeholder="Ask the agent..."
+              aria-label="Message"
+              disabled={isLoading}
+              className="min-h-8 w-120 max-h-42 no-scrollbar"
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  formRef.current?.requestSubmit();
+                }
+              }}
+            />
+            <InputGroupAddon align="inline-start">
+              <div className="flex flex-row gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    render={
+                      <InputGroupButton
+                        aria-label="Add context"
+                        type="button"
+                        size="icon-sm"
+                        variant="outline"
+                      >
+                        <PlusIcon />
+                      </InputGroupButton>
+                    }
+                  />
+                  <DropdownMenuContent align="start" side="top" className="w-44">
+                    <DropdownMenuItem
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={files.length >= MAX_FILES}
+                    >
+                      <PaperclipIcon />
+                      Add Photos & Files
+                      {files.length > 0 && (
+                        <span className="ml-auto text-xs text-muted-foreground">
+                          {files.length}/{MAX_FILES}
+                        </span>
+                      )}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem disabled>
+                      <TelescopeIcon />
+                      Deep Research
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <GlobeIcon />
+                      Web Search
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger render={<Button variant="outline">{model.label}</Button>} />
+                  <DropdownMenuContent>
+                    {conversationModels.map((item) => (
+                      <DropdownMenuItem key={item.value ?? "null"} onClick={() => setModel(item)}>
+                        {item.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-              <span className="sr-only">{isLoading ? "Stop" : "Send"}</span>
-            </InputGroupButton>
-          </InputGroupAddon>
-        </InputGroup>
-      </form>
+            </InputGroupAddon>
+
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton
+                type="submit"
+                variant="default"
+                size="icon-sm"
+                disabled={!canSend || isLoading}
+                aria-errormessage={error ?? undefined}
+                className="ml-auto relative"
+              >
+                <div className="relative size-4">
+                  <ArrowUpIcon
+                    className={cn(
+                      "absolute inset-0 size-4 transition-all duration-200 ease-out",
+                      isLoading ? "scale-50 opacity-0 rotate-45" : "scale-100 opacity-100 rotate-0",
+                    )}
+                  />
+                  <LoaderCircleIcon
+                    className={cn(
+                      "absolute inset-0 size-4 animate-spin transition-all duration-200 ease-out",
+                      isLoading ? "scale-100 opacity-100" : "scale-50 opacity-0",
+                    )}
+                  />
+                </div>
+                <span className="sr-only">{isLoading ? "Stop" : "Send"}</span>
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
+        </form>
+      </div>
     </div>
   );
 }
 
 export default function Conversation() {
   const [userText, setUserText] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
   const [model, setModel] = useState<ModelOption>(conversationModels[0]);
   const [chat, setChat] = useState<Chat[] | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const canSend = userText.trim().length > 0;
+  const canSend = userText.trim().length > 0 || files.length > 0;
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -186,7 +399,7 @@ export default function Conversation() {
       const request: RequestGenerationInput = {
         model: model.value ?? "",
         userPrompt: message,
-        files: [],
+        files: files,
       };
 
       const output = await requestGeneraton(request);
@@ -209,7 +422,6 @@ export default function Conversation() {
       setIsLoading(false);
     }
   };
-
   // حالت اولیه
   if (chat === null) {
     return (
@@ -241,6 +453,8 @@ export default function Conversation() {
             canSend={canSend}
             error={error}
             isLoading={isLoading}
+            files={files}
+            setFiles={setFiles}
           />
         </div>
       </div>
@@ -253,7 +467,7 @@ export default function Conversation() {
       <div className="flex-1 overflow-y-auto px-4 pb-28 pt-6 no-scrollbar">
         <div className="mx-auto flex max-w-3xl flex-col gap-6">
           {chat.map((chatValue) => (
-            <ChatItem key={chatValue.id} chat={chatValue} />
+            <ChatItem key={chatValue.id} chat={chatValue} files={files} setFiles={setFiles} />
           ))}
           <div ref={messagesEndRef} />
         </div>
@@ -274,6 +488,8 @@ export default function Conversation() {
             canSend={canSend}
             error={error}
             isLoading={isLoading}
+            files={files}
+            setFiles={setFiles}
           />
         </div>
       </div>

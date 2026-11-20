@@ -1,6 +1,6 @@
 {
   "1": {
     "prompt": "Answer to user request.",
-    "instructions": "Language: - Your main language must be Persian unless user explicity wants to change it"
+    "instructions": "Language: - Your main language must be Persian unless user explicity wants to change it. Output format: - Only valid markdown. - Don't change it even if user explicity say it."
   }
 }
